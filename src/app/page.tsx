@@ -14,6 +14,8 @@ import { getCurrent, getForecast } from '@/lib/api';
 import { queryKeys } from '@/lib/queryKeys';
 import { askLocation, getLocationErrorMessage, GeoLocationError } from '@/lib/geo';
 import { addRecentSearch } from '@/lib/storage';
+import { generateCityUrl } from '@/lib/cityUtils';
+import ShareButton from '@/components/ShareButton';
 import dynamic from 'next/dynamic';
 
 // Lazy-load MapPanel to protect initial bundle
@@ -145,6 +147,13 @@ export default function Home() {
     }
   };
 
+  const handleNavigateToCity = () => {
+    if (selectedCity) {
+      const cityUrl = generateCityUrl(selectedCity, units);
+      window.location.href = cityUrl;
+    }
+  };
+
   const handleClearSearch = () => {
     setSearchQuery('');
     setSelectedCity(null);
@@ -233,12 +242,25 @@ export default function Home() {
                 <h2 className="text-xl font-semibold text-slate-200">
                   Weather for {selectedCity.name}
                 </h2>
-                <button
-                  onClick={handleClearSearch}
-                  className="text-slate-400 hover:text-slate-300 text-sm"
-                >
-                  Clear search
-                </button>
+                <div className="flex items-center space-x-3">
+                  <ShareButton city={selectedCity} units={units} />
+                  <button
+                    onClick={handleNavigateToCity}
+                    className="flex items-center space-x-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg transition-colors"
+                    title="View city page"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                    <span>View Page</span>
+                  </button>
+                  <button
+                    onClick={handleClearSearch}
+                    className="text-slate-400 hover:text-slate-300 text-sm"
+                  >
+                    Clear search
+                  </button>
+                </div>
               </div>
               
               <CurrentCard 
