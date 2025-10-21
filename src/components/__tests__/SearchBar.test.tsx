@@ -11,14 +11,14 @@ vi.mock('@/lib/storage', () => ({
 }))
 
 describe('SearchBar', () => {
-  const mockOnSearch = vi.fn()
+  const mockOnCitySelect = vi.fn()
 
   beforeEach(() => {
-    mockOnSearch.mockClear()
+    mockOnCitySelect.mockClear()
   })
 
   it('renders search input with correct attributes', () => {
-    render(<SearchBar onSearch={mockOnSearch} />)
+    render(<SearchBar onCitySelect={mockOnCitySelect} />)
     
     const input = screen.getByRole('combobox', { name: /search for a city/i })
     expect(input).toBeInTheDocument()
@@ -26,33 +26,45 @@ describe('SearchBar', () => {
     expect(input).toHaveAttribute('aria-haspopup', 'listbox')
   })
 
-  it('calls onSearch when typing and debounces input', async () => {
+  it('calls onCitySelect when a city is selected', async () => {
     const user = userEvent.setup()
-    render(<SearchBar onSearch={mockOnSearch} />)
+    render(<SearchBar onCitySelect={mockOnCitySelect} />)
     
     const input = screen.getByRole('combobox', { name: /search for a city/i })
     await user.type(input, 'London')
     
-    // Wait for debounce
+    // Wait for search results to appear
     await waitFor(() => {
-      expect(mockOnSearch).toHaveBeenCalledWith('London')
-    }, { timeout: 500 })
+      expect(screen.getByText('London')).toBeInTheDocument()
+    }, { timeout: 1000 })
+    
+    // Click on the first result
+    const londonResult = screen.getByText('London')
+    await user.click(londonResult)
+    
+    expect(mockOnCitySelect).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'London',
+        lat: expect.any(Number),
+        lon: expect.any(Number)
+      })
+    )
   })
 
   it('shows recent searches dropdown on focus', async () => {
     const user = userEvent.setup()
-    render(<SearchBar onSearch={mockOnSearch} />)
+    render(<SearchBar onCitySelect={mockOnCitySelect} />)
     
     const input = screen.getByRole('combobox', { name: /search for a city/i })
     await user.click(input)
     
-    expect(screen.getByRole('listbox', { name: /recent searches/i })).toBeInTheDocument()
+    expect(screen.getByRole('listbox', { name: /search suggestions/i })).toBeInTheDocument()
     expect(screen.getByText('Recent Searches')).toBeInTheDocument()
   })
 
   it('navigates recent searches with arrow keys', async () => {
     const user = userEvent.setup()
-    render(<SearchBar onSearch={mockOnSearch} />)
+    render(<SearchBar onCitySelect={mockOnCitySelect} />)
     
     const input = screen.getByRole('combobox', { name: /search for a city/i })
     await user.click(input)
@@ -73,7 +85,7 @@ describe('SearchBar', () => {
 
   it('selects recent search with Enter key', async () => {
     const user = userEvent.setup()
-    render(<SearchBar onSearch={mockOnSearch} />)
+    render(<SearchBar onCitySelect={mockOnCitySelect} />)
     
     const input = screen.getByRole('combobox', { name: /search for a city/i })
     await user.click(input)
@@ -81,13 +93,13 @@ describe('SearchBar', () => {
     // Navigate to first option and select it
     await user.keyboard('{ArrowDown}{Enter}')
     
-    expect(mockOnSearch).toHaveBeenCalledWith('London')
+    // Should set the query to the recent search
     expect(input).toHaveValue('London')
   })
 
   it('closes dropdown with Escape key', async () => {
     const user = userEvent.setup()
-    render(<SearchBar onSearch={mockOnSearch} />)
+    render(<SearchBar onCitySelect={mockOnCitySelect} />)
     
     const input = screen.getByRole('combobox', { name: /search for a city/i })
     await user.click(input)
@@ -101,7 +113,7 @@ describe('SearchBar', () => {
 
   it('focuses search input with "/" key shortcut', async () => {
     const user = userEvent.setup()
-    render(<SearchBar onSearch={mockOnSearch} />)
+    render(<SearchBar onCitySelect={mockOnCitySelect} />)
     
     // Click somewhere else first
     await user.click(document.body)
@@ -115,7 +127,7 @@ describe('SearchBar', () => {
 
   it('does not focus search when already focused', async () => {
     const user = userEvent.setup()
-    render(<SearchBar onSearch={mockOnSearch} />)
+    render(<SearchBar onCitySelect={mockOnCitySelect} />)
     
     const input = screen.getByRole('combobox', { name: /search for a city/i })
     await user.click(input)
@@ -131,7 +143,7 @@ describe('SearchBar', () => {
     const user = userEvent.setup()
     const { clearRecentSearches } = await import('@/lib/storage')
     
-    render(<SearchBar onSearch={mockOnSearch} />)
+    render(<SearchBar onCitySelect={mockOnCitySelect} />)
     
     const input = screen.getByRole('combobox', { name: /search for a city/i })
     await user.click(input)
@@ -143,20 +155,32 @@ describe('SearchBar', () => {
   })
 
   it('handles disabled state correctly', () => {
-    render(<SearchBar onSearch={mockOnSearch} disabled={true} />)
+    render(<SearchBar onCitySelect={mockOnCitySelect} disabled={true} />)
     
     const input = screen.getByRole('combobox', { name: /search for a city/i })
     expect(input).toBeDisabled()
   })
 
-  it('submits form with Enter key', async () => {
+  it('submits form with Enter key when search results are available', async () => {
     const user = userEvent.setup()
-    render(<SearchBar onSearch={mockOnSearch} />)
+    render(<SearchBar onCitySelect={mockOnCitySelect} />)
     
     const input = screen.getByRole('combobox', { name: /search for a city/i })
     await user.type(input, 'Paris')
+    
+    // Wait for search results to appear
+    await waitFor(() => {
+      expect(screen.getByText('Paris')).toBeInTheDocument()
+    }, { timeout: 1000 })
+    
     await user.keyboard('{Enter}')
     
-    expect(mockOnSearch).toHaveBeenCalledWith('Paris')
+    expect(mockOnCitySelect).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Paris',
+        lat: expect.any(Number),
+        lon: expect.any(Number)
+      })
+    )
   })
 })

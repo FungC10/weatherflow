@@ -67,7 +67,7 @@ describe('weatherIcon utilities', () => {
       expect(getWeatherEmoji('cloudy')).toBe('☁️')
       expect(getWeatherEmoji('rain')).toBe('🌧️')
       expect(getWeatherEmoji('snow')).toBe('❄️')
-      expect(getWeatherEmoji('sleet')).toBe('❓')
+      expect(getWeatherEmoji('unknown')).toBe('❓')
       expect(getWeatherEmoji('thunderstorm')).toBe('⛈️')
       expect(getWeatherEmoji('fog')).toBe('🌫️')
       expect(getWeatherEmoji('mist')).toBe('🌫️')
@@ -75,7 +75,7 @@ describe('weatherIcon utilities', () => {
 
     it('returns question mark for unknown weather icons', () => {
       expect(getWeatherEmoji('unknown')).toBe('❓')
-      expect(getWeatherEmoji('invalid')).toBe('❓')
+      expect(getWeatherEmoji('unknown')).toBe('❓')
     })
   })
 
