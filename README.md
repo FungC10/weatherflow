@@ -50,12 +50,29 @@ A modern weather application built with Next.js 14, TypeScript, and Tailwind CSS
    cp .env.example .env.local
    ```
    
-   Edit `.env.local` and add your OpenWeatherMap API key:
-   ```
-   NEXT_PUBLIC_OWM_API_KEY=your_api_key_here
-   ```
+   Edit `.env.local` with your preferred weather provider:
 
-4. **Get an API key**
+### 🌤 Environment Variables
+| Variable | Required | Description |
+|-----------|-----------|-------------|
+| `NEXT_PUBLIC_WEATHER_PROVIDER` | No | `"open-meteo"` (free) or `"openweather"` (requires key) |
+| `NEXT_PUBLIC_WEATHER_API_KEY` | Only if provider = openweather | Your OpenWeatherMap key |
+
+> The default build runs on Open-Meteo (no key needed).  
+> Switch to OpenWeatherMap anytime by setting the env vars above.
+
+**For Open-Meteo (default, no key needed):**
+```
+NEXT_PUBLIC_WEATHER_PROVIDER=open-meteo
+```
+
+**For OpenWeatherMap (requires API key):**
+```
+NEXT_PUBLIC_WEATHER_PROVIDER=openweather
+NEXT_PUBLIC_WEATHER_API_KEY=your_api_key_here
+```
+
+4. **Get an API key (only if using OpenWeatherMap)**
    - Visit [OpenWeatherMap](https://openweathermap.org/api)
    - Sign up for a free account
    - Generate an API key

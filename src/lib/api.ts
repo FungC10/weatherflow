@@ -10,6 +10,10 @@ import {
 const GEOCODING_BASE_URL = 'https://geocoding-api.open-meteo.com/v1';
 const FORECAST_BASE_URL = 'https://api.open-meteo.com/v1';
 
+// Provider configuration
+const PROVIDER = process.env.NEXT_PUBLIC_WEATHER_PROVIDER ?? 'open-meteo';
+const API_KEY = process.env.NEXT_PUBLIC_WEATHER_API_KEY;
+
 // Search for cities using Open-Meteo Geocoding API
 export async function searchCity(query: string): Promise<GeoPoint[]> {
   if (!query.trim()) {
@@ -38,8 +42,21 @@ export async function searchCity(query: string): Promise<GeoPoint[]> {
   }));
 }
 
-// Get current weather using Open-Meteo API
+// Get current weather using configured provider
 export async function getCurrent(lat: number, lon: number, units: Units): Promise<CurrentWeather> {
+  if (PROVIDER === 'open-meteo') {
+    return getCurrentOpenMeteo(lat, lon, units);
+  }
+  
+  if (PROVIDER === 'openweather' && API_KEY) {
+    return getCurrentOpenWeather(lat, lon, units);
+  }
+  
+  throw new Error(`Unsupported provider or missing key: ${PROVIDER}`);
+}
+
+// Open-Meteo implementation
+async function getCurrentOpenMeteo(lat: number, lon: number, units: Units): Promise<CurrentWeather> {
   const temperatureUnit = units === 'metric' ? 'celsius' : 'fahrenheit';
   const windSpeedUnit = units === 'metric' ? 'kmh' : 'mph';
   
@@ -81,41 +98,44 @@ export async function getCurrent(lat: number, lon: number, units: Units): Promis
   };
 }
 
-// Get forecast using Open-Meteo API
-export async function getForecast(lat: number, lon: number, units: Units): Promise<Forecast> {
-  const temperatureUnit = units === 'metric' ? 'celsius' : 'fahrenheit';
-  const windSpeedUnit = units === 'metric' ? 'kmh' : 'mph';
-  
-  const url = `${FORECAST_BASE_URL}/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&temperature_unit=${temperatureUnit}&wind_speed_unit=${windSpeedUnit}`;
+// OpenWeatherMap implementation
+async function getCurrentOpenWeather(lat: number, lon: number, units: Units): Promise<CurrentWeather> {
+  const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=${units}&appid=${API_KEY}`;
   
   const response = await fetch(url);
   
   if (!response.ok) {
-    throw new Error(`Failed to fetch forecast: ${response.status} ${response.statusText}`);
+    if (response.status === 401) {
+      throw new Error('Invalid API key. Please check your OpenWeatherMap API key.');
+    }
+    if (response.status === 404) {
+      throw new Error('Weather data not found for this location.');
+    }
+    if (response.status === 429) {
+      throw new Error('API rate limit exceeded. Please try again later.');
+    }
+    throw new Error(`Failed to fetch weather data: ${response.status} ${response.statusText}`);
   }
   
-  const data: OpenMeteoForecastResponse = await response.json();
-  
-  // Convert Open-Meteo format to our UI format
-  const daily = data.daily;
-  const dailyForecasts = daily.time.map((time, index) => ({
-    dt: Math.floor(new Date(time).getTime() / 1000),
-    temp: {
-      min: daily.temperature_2m_min[index],
-      max: daily.temperature_2m_max[index]
-    },
-    weather: [{
-      id: daily.weathercode[index],
-      main: getWeatherMain(daily.weathercode[index]),
-      description: getWeatherDescription(daily.weathercode[index]),
-      icon: getWeatherIcon(daily.weathercode[index])
-    }]
-  }));
-  
-  return {
-    timezone_offset: data.utc_offset_seconds,
-    daily: dailyForecasts
-  };
+  const data = await response.json();
+  return data;
+}
+
+// Get forecast using configured provider
+export async function getForecast(lat: number, lon: number, units: Units): Promise<Forecast> {
+  if (PROVIDER === 'open-meteo') {
+    // free route – no key
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&temperature_unit=${units === 'metric' ? 'celsius' : 'fahrenheit'}&wind_speed_unit=${units === 'metric' ? 'kmh' : 'mph'}`;
+    return fetch(url).then(r => r.json());
+  }
+
+  if (PROVIDER === 'openweather' && API_KEY) {
+    // OpenWeatherMap route – requires key
+    const url = `https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&units=${units}&appid=${API_KEY}`;
+    return fetch(url).then(r => r.json());
+  }
+
+  throw new Error(`Unsupported provider or missing key: ${PROVIDER}`);
 }
 
 // Helper functions to convert Open-Meteo weather codes to readable strings
