@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Units, DailyForecast } from '@/lib/types';
 import { formatTemp } from '@/lib/format';
 import { getWeatherIcon, getWeatherEmoji, isDayTime } from '@/lib/weatherIcon';
@@ -8,7 +9,7 @@ interface ForecastItemProps {
   isToday?: boolean;
 }
 
-export default function ForecastItem({ forecast, units, isToday = false }: ForecastItemProps) {
+const ForecastItem = memo(function ForecastItem({ forecast, units, isToday = false }: ForecastItemProps) {
   const dayName = isToday 
     ? 'Today' 
     : new Date(forecast.dt * 1000).toLocaleDateString('en-US', { weekday: 'short' });
@@ -41,4 +42,6 @@ export default function ForecastItem({ forecast, units, isToday = false }: Forec
       </div>
     </div>
   );
-}
+});
+
+export default ForecastItem;

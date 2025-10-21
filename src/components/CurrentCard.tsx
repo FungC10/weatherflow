@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { GeoPoint, Units, CurrentWeather } from '@/lib/types';
 import { formatTemp, formatWind, formatPressure, formatDate, getWindDirection } from '@/lib/format';
 
@@ -8,7 +9,7 @@ interface CurrentCardProps {
   isLoading?: boolean;
 }
 
-export default function CurrentCard({ weather, location, units, isLoading = false }: CurrentCardProps) {
+const CurrentCard = memo(function CurrentCard({ weather, location, units, isLoading = false }: CurrentCardProps) {
   if (isLoading) {
     return (
       <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
@@ -84,4 +85,6 @@ export default function CurrentCard({ weather, location, units, isLoading = fals
       </div>
     </div>
   );
-}
+});
+
+export default CurrentCard;

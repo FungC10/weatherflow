@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Units, DailyForecast } from '@/lib/types';
 import ForecastItem from './ForecastItem';
 import { motion } from 'framer-motion';
@@ -8,7 +9,7 @@ interface ForecastListProps {
   isLoading?: boolean;
 }
 
-export default function ForecastList({ forecasts, units, isLoading = false }: ForecastListProps) {
+const ForecastList = memo(function ForecastList({ forecasts, units, isLoading = false }: ForecastListProps) {
   if (isLoading) {
     return (
       <div className="space-y-3">
@@ -75,4 +76,6 @@ export default function ForecastList({ forecasts, units, isLoading = false }: Fo
       </motion.div>
     </div>
   );
-}
+});
+
+export default ForecastList;

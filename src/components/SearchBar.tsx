@@ -126,30 +126,31 @@ export default function SearchBar({
     inputRef.current?.focus();
   }, [onSearch]);
 
-  const handleClearRecent = () => {
+  const handleClearRecent = useCallback(() => {
     clearRecentSearches();
     setRecentSearches([]);
     setFocusedIndex(-1);
-  };
+  }, []);
 
-  const handleInputFocus = () => {
+  const handleInputFocus = useCallback(() => {
     if (recentSearches.length > 0) {
       setShowRecent(true);
     }
-  };
+  }, [recentSearches.length]);
 
-  const handleInputBlur = () => {
+  const handleInputBlur = useCallback(() => {
     // Delay hiding to allow clicking on recent items
     setTimeout(() => {
       setShowRecent(false);
       setFocusedIndex(-1);
     }, 150);
-  };
+  }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(e.target.value);
     setFocusedIndex(-1);
-  };
+  }, []);
+
 
   return (
     <div className="w-full max-w-md mx-auto relative">

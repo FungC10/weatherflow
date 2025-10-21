@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo, useCallback } from 'react';
 import { setJSON, getJSON } from '@/lib/storage';
 import { Units } from '@/lib/types';
 
@@ -9,7 +9,7 @@ interface UnitToggleProps {
   disabled?: boolean;
 }
 
-export default function UnitToggle({ onChange, disabled = false }: UnitToggleProps) {
+const UnitToggle = memo(function UnitToggle({ onChange, disabled = false }: UnitToggleProps) {
   const [units, setUnits] = useState<Units>('metric');
 
   // Load units from localStorage on mount
@@ -21,12 +21,12 @@ export default function UnitToggle({ onChange, disabled = false }: UnitTogglePro
     }
   }, [onChange]);
 
-  const handleToggle = () => {
+  const handleToggle = useCallback(() => {
     const newUnits = units === 'metric' ? 'imperial' : 'metric';
     setUnits(newUnits);
     setJSON('weatherflow:units', newUnits);
     onChange(newUnits);
-  };
+  }, [units, onChange]);
 
   return (
     <div className="flex items-center space-x-2">
@@ -60,4 +60,6 @@ export default function UnitToggle({ onChange, disabled = false }: UnitTogglePro
       </div>
     </div>
   );
-}
+});
+
+export default UnitToggle;

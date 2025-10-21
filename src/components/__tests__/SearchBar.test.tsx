@@ -1,15 +1,17 @@
+import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { vi, describe, it, expect, beforeEach } from 'vitest'
 import SearchBar from '../SearchBar'
 
 // Mock the storage functions
-jest.mock('@/lib/storage', () => ({
-  getRecentSearches: jest.fn(() => ['London', 'New York', 'Tokyo']),
-  clearRecentSearches: jest.fn(),
+vi.mock('@/lib/storage', () => ({
+  getRecentSearches: vi.fn(() => ['London', 'New York', 'Tokyo']),
+  clearRecentSearches: vi.fn(),
 }))
 
 describe('SearchBar', () => {
-  const mockOnSearch = jest.fn()
+  const mockOnSearch = vi.fn()
 
   beforeEach(() => {
     mockOnSearch.mockClear()
@@ -127,7 +129,7 @@ describe('SearchBar', () => {
 
   it('clears recent searches when clear button is clicked', async () => {
     const user = userEvent.setup()
-    const { clearRecentSearches } = require('@/lib/storage')
+    const { clearRecentSearches } = await import('@/lib/storage')
     
     render(<SearchBar onSearch={mockOnSearch} />)
     

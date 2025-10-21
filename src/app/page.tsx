@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import SearchBar from '@/components/SearchBar';
 import UnitToggle from '@/components/UnitToggle';
 import CurrentCard from '@/components/CurrentCard';
-import ForecastList from '@/components/ForecastList';
 import EmptyState from '@/components/EmptyState';
 import ErrorState from '@/components/ErrorState';
 import LoadingShimmer from '@/components/LoadingShimmer';
@@ -27,6 +26,32 @@ const MapPanel = dynamic(() => import('@/components/MapPanel'), {
         <div className="animate-spin rounded-full h-8 w-8 border-2 border-cyan-400 border-t-transparent mx-auto mb-2"></div>
         <p className="text-slate-400 text-sm">Loading map...</p>
       </div>
+    </div>
+  )
+});
+
+// Lazy-load ForecastList for better code splitting
+const ForecastList = dynamic(() => import('@/components/ForecastList'), {
+  ssr: false,
+  loading: () => (
+    <div className="space-y-3">
+      <h3 className="text-lg font-semibold text-slate-200 mb-4">5-Day Forecast</h3>
+      {Array.from({ length: 5 }).map((_, index) => (
+        <div key={index} className="bg-white/5 backdrop-blur-sm rounded-lg p-4 border border-slate-700/30">
+          <div className="animate-pulse">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <div className="h-4 bg-slate-700 rounded w-16 mb-2"></div>
+                <div className="h-3 bg-slate-700 rounded w-24"></div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="h-4 bg-slate-700 rounded w-8"></div>
+                <div className="h-4 bg-slate-700 rounded w-8"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
     </div>
   )
 });
@@ -56,8 +81,16 @@ export default function Home() {
       return getCurrent(selectedCity.lat, selectedCity.lon, units);
     },
     enabled: !!selectedCity && typeof window !== 'undefined',
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    retry: 2,
+    staleTime: 8 * 60 * 1000, // 8 minutes - current weather changes more frequently
+    gcTime: 15 * 60 * 1000, // 15 minutes garbage collection
+    retry: (failureCount, error) => {
+      // Don't retry on 4xx errors (client errors)
+      if (error && 'status' in error && typeof error.status === 'number' && error.status >= 400 && error.status < 500) {
+        return false;
+      }
+      return failureCount < 1; // Only retry once for other errors
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   });
 
   // Fetch forecast when city is selected
@@ -74,14 +107,22 @@ export default function Home() {
       return getForecast(selectedCity.lat, selectedCity.lon, units);
     },
     enabled: !!selectedCity && typeof window !== 'undefined',
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    retry: 2,
+    staleTime: 30 * 60 * 1000, // 30 minutes - forecast changes less frequently
+    gcTime: 60 * 60 * 1000, // 1 hour garbage collection
+    retry: (failureCount, error) => {
+      // Don't retry on 4xx errors (client errors)
+      if (error && 'status' in error && typeof error.status === 'number' && error.status >= 400 && error.status < 500) {
+        return false;
+      }
+      return failureCount < 1; // Only retry once for other errors
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   });
 
-  // Get forecast data from API
-  const forecasts = forecastData?.daily || [];
+  // Get forecast data from API - memoized to prevent unnecessary re-renders
+  const forecasts = useMemo(() => forecastData?.daily || [], [forecastData?.daily]);
 
-  const handleSearch = (query: string) => {
+  const handleSearch = useCallback((query: string) => {
     if (!query.trim()) return;
     
     setSearchQuery(query);
@@ -97,7 +138,7 @@ export default function Home() {
     
     setSelectedCity(mockCity);
     addRecentSearch(query);
-  };
+  }, []);
 
   const handleUseLocation = async () => {
     setIsRequestingLocation(true);
@@ -123,7 +164,7 @@ export default function Home() {
     }
   };
 
-  const handleUnitsChange = (newUnits: Units) => {
+  const handleUnitsChange = useCallback((newUnits: Units) => {
     setUnits(newUnits);
     // Invalidate both current weather and forecast queries to refetch with new units
     if (selectedCity) {
@@ -134,9 +175,9 @@ export default function Home() {
         queryKey: queryKeys.forecast(selectedCity.lat, selectedCity.lon, units)
       });
     }
-  };
+  }, [selectedCity, units, queryClient]);
 
-  const handleRetry = () => {
+  const handleRetry = useCallback(() => {
     if (selectedCity) {
       queryClient.invalidateQueries({
         queryKey: queryKeys.current(selectedCity.lat, selectedCity.lon, units)
@@ -145,16 +186,16 @@ export default function Home() {
         queryKey: queryKeys.forecast(selectedCity.lat, selectedCity.lon, units)
       });
     }
-  };
+  }, [selectedCity, units, queryClient]);
 
-  const handleNavigateToCity = () => {
+  const handleNavigateToCity = useCallback(() => {
     if (selectedCity) {
       const cityUrl = generateCityUrl(selectedCity, units);
       window.location.href = cityUrl;
     }
-  };
+  }, [selectedCity, units]);
 
-  const handleClearSearch = () => {
+  const handleClearSearch = useCallback(() => {
     setSearchQuery('');
     setSelectedCity(null);
     // Focus search input after clearing
@@ -164,7 +205,7 @@ export default function Home() {
         input?.focus();
       }, 100);
     }
-  };
+  }, []);
 
   return (
     <main className="min-h-screen">
