@@ -12,6 +12,8 @@ import LoadingShimmer from '@/components/LoadingShimmer';
 import { Units, GeoPoint } from '@/lib/types';
 import { getCurrent, getForecast } from '@/lib/api';
 import { queryKeys } from '@/lib/queryKeys';
+import { askLocation, getLocationErrorMessage, GeoLocationError } from '@/lib/geo';
+import { addRecentSearch } from '@/lib/storage';
 
 type AppState = 'empty' | 'loading' | 'error' | 'success';
 
@@ -19,6 +21,8 @@ export default function Home() {
   const [selectedCity, setSelectedCity] = useState<GeoPoint | null>(null);
   const [units, setUnits] = useState<Units>('metric');
   const [searchQuery, setSearchQuery] = useState('');
+  const [locationError, setLocationError] = useState<string | null>(null);
+  const [isRequestingLocation, setIsRequestingLocation] = useState(false);
   const queryClient = useQueryClient();
 
   // Fetch current weather when city is selected
@@ -64,6 +68,7 @@ export default function Home() {
     if (!query.trim()) return;
     
     setSearchQuery(query);
+    setLocationError(null);
     
     // Mock city selection for now (will be replaced with real geocoding)
     const mockCity: GeoPoint = {
@@ -74,6 +79,31 @@ export default function Home() {
     };
     
     setSelectedCity(mockCity);
+    addRecentSearch(query);
+  };
+
+  const handleUseLocation = async () => {
+    setIsRequestingLocation(true);
+    setLocationError(null);
+    
+    try {
+      const location = await askLocation();
+      const locationCity: GeoPoint = {
+        lat: location.lat,
+        lon: location.lon,
+        name: location.name || 'Current Location',
+        country: location.country
+      };
+      
+      setSelectedCity(locationCity);
+      setSearchQuery(locationCity.name || 'Current Location');
+      addRecentSearch(locationCity.name || 'Current Location');
+    } catch (error) {
+      const geoError = error as GeoLocationError;
+      setLocationError(getLocationErrorMessage(geoError));
+    } finally {
+      setIsRequestingLocation(false);
+    }
   };
 
   const handleUnitsChange = (newUnits: Units) => {
@@ -116,6 +146,36 @@ export default function Home() {
               <SearchBar onSearch={handleSearch} />
               <UnitToggle onChange={handleUnitsChange} />
             </div>
+          </div>
+          
+          {/* Location Button and Error */}
+          <div className="mt-4 flex flex-col items-center space-y-2">
+            <button
+              onClick={handleUseLocation}
+              disabled={isRequestingLocation}
+              className="flex items-center space-x-2 px-4 py-2 bg-cyan-600 hover:bg-cyan-700 disabled:bg-cyan-600/50 text-white rounded-lg transition-colors disabled:cursor-not-allowed"
+            >
+              {isRequestingLocation ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                  <span>Getting location...</span>
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span>Use my location</span>
+                </>
+              )}
+            </button>
+            
+            {locationError && (
+              <div className="text-sm text-red-400 text-center max-w-md">
+                {locationError}
+              </div>
+            )}
           </div>
         </div>
       </div>

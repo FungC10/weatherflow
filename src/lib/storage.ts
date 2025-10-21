@@ -29,3 +29,43 @@ export function removeKey(key: string): void {
     // Silently fail if localStorage is not available
   }
 }
+
+// Recent searches helpers
+export function getRecentSearches(): string[] {
+  try {
+    if (typeof window === 'undefined') return [];
+    const recent = getJSON<string[]>('weatherflow:recent');
+    return recent || [];
+  } catch {
+    return [];
+  }
+}
+
+export function addRecentSearch(search: string): void {
+  try {
+    if (typeof window === 'undefined') return;
+    const recent = getRecentSearches();
+    const updated = pushUnique(recent, search, 6);
+    setJSON('weatherflow:recent', updated);
+  } catch {
+    // Silently fail if localStorage is not available
+  }
+}
+
+export function clearRecentSearches(): void {
+  try {
+    if (typeof window === 'undefined') return;
+    removeKey('weatherflow:recent');
+  } catch {
+    // Silently fail if localStorage is not available
+  }
+}
+
+function pushUnique<T>(array: T[], item: T, maxLength: number): T[] {
+  // Remove existing item if it exists
+  const filtered = array.filter(existing => existing !== item);
+  // Add new item to the beginning
+  const updated = [item, ...filtered];
+  // Keep only the most recent items
+  return updated.slice(0, maxLength);
+}
