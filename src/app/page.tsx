@@ -157,6 +157,12 @@ export default function Home() {
   const handleClearSearch = () => {
     setSearchQuery('');
     setSelectedCity(null);
+    // Focus search input after clearing
+    if (typeof window !== 'undefined') {
+      setTimeout(() => {
+        document.querySelector('input[type="text"]')?.focus();
+      }, 100);
+    }
   };
 
   return (
@@ -177,16 +183,17 @@ export default function Home() {
             <button
               onClick={handleUseLocation}
               disabled={isRequestingLocation}
-              className="flex items-center space-x-2 px-4 py-2 bg-cyan-600 hover:bg-cyan-700 disabled:bg-cyan-600/50 text-white rounded-lg transition-colors disabled:cursor-not-allowed"
+              className="flex items-center space-x-2 px-4 py-2 bg-cyan-600 hover:bg-cyan-700 disabled:bg-cyan-600/50 text-white rounded-lg transition-all duration-200 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-900 hover:shadow-lg hover:scale-105 active:scale-95"
+              aria-label={isRequestingLocation ? "Getting your current location" : "Use your current location for weather"}
             >
               {isRequestingLocation ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" aria-hidden="true"></div>
                   <span>Getting location...</span>
                 </>
               ) : (
                 <>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
@@ -196,7 +203,11 @@ export default function Home() {
             </button>
             
             {locationError && (
-              <div className="text-sm text-red-400 text-center max-w-md">
+              <div 
+                className="text-sm text-red-400 text-center max-w-md p-3 bg-red-500/10 border border-red-500/20 rounded-lg backdrop-blur-sm"
+                role="alert"
+                aria-live="polite"
+              >
                 {locationError}
               </div>
             )}
@@ -221,7 +232,10 @@ export default function Home() {
           )}
 
           {selectedCity && (isLoadingWeather || isLoadingForecast) && (
-            <LoadingShimmer type="full" />
+            <LoadingShimmer 
+              type="full" 
+              message={`Loading weather data for ${selectedCity.name}...`}
+            />
           )}
 
           {selectedCity && (weatherError || forecastError) && (
@@ -232,7 +246,8 @@ export default function Home() {
                 forecastError instanceof Error ? forecastError.message :
                 'Something went wrong'
               }
-              onRetry={handleRetry} 
+              onRetry={handleRetry}
+              autoFocus={true}
             />
           )}
 
@@ -246,17 +261,18 @@ export default function Home() {
                   <ShareButton city={selectedCity} units={units} />
                   <button
                     onClick={handleNavigateToCity}
-                    className="flex items-center space-x-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg transition-colors"
-                    title="View city page"
+                    className="flex items-center space-x-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-900 hover:shadow-lg hover:scale-105 active:scale-95"
+                    aria-label={`View detailed weather page for ${selectedCity.name}`}
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                     </svg>
                     <span>View Page</span>
                   </button>
                   <button
                     onClick={handleClearSearch}
-                    className="text-slate-400 hover:text-slate-300 text-sm"
+                    className="text-slate-400 hover:text-slate-300 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-900 rounded px-2 py-1"
+                    aria-label="Clear search and return to home"
                   >
                     Clear search
                   </button>
@@ -273,9 +289,11 @@ export default function Home() {
               <div className="space-y-3">
                 <button
                   onClick={() => setShowMap(!showMap)}
-                  className="flex items-center space-x-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg transition-colors"
+                  className="flex items-center space-x-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-900 hover:shadow-lg hover:scale-105 active:scale-95"
+                  aria-label={showMap ? 'Hide map view' : 'Show map view'}
+                  aria-expanded={showMap}
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                   </svg>
                   <span>{showMap ? 'Hide map' : 'Show map'}</span>
