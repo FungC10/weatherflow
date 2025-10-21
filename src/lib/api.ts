@@ -126,13 +126,47 @@ export async function getForecast(lat: number, lon: number, units: Units): Promi
   if (PROVIDER === 'open-meteo') {
     // free route – no key
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&temperature_unit=${units === 'metric' ? 'celsius' : 'fahrenheit'}&wind_speed_unit=${units === 'metric' ? 'kmh' : 'mph'}`;
-    return fetch(url).then(r => r.json());
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch forecast: ${response.status} ${response.statusText}`);
+    }
+    
+    const data: OpenMeteoForecastResponse = await response.json();
+    
+    // Convert Open-Meteo format to our UI format
+    const daily = data.daily;
+    const dailyForecasts = daily.time.map((time, index) => ({
+      dt: Math.floor(new Date(time).getTime() / 1000),
+      temp: {
+        min: daily.temperature_2m_min[index],
+        max: daily.temperature_2m_max[index]
+      },
+      weather: [{
+        id: daily.weathercode[index],
+        main: getWeatherMain(daily.weathercode[index]),
+        description: getWeatherDescription(daily.weathercode[index]),
+        icon: getWeatherIcon(daily.weathercode[index])
+      }]
+    }));
+    
+    return {
+      timezone_offset: data.utc_offset_seconds,
+      daily: dailyForecasts
+    };
   }
 
   if (PROVIDER === 'openweather' && API_KEY) {
     // OpenWeatherMap route – requires key
     const url = `https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&units=${units}&appid=${API_KEY}`;
-    return fetch(url).then(r => r.json());
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch forecast: ${response.status} ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    return data;
   }
 
   throw new Error(`Unsupported provider or missing key: ${PROVIDER}`);

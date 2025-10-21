@@ -18,8 +18,8 @@ describe('format utilities', () => {
 
   describe('formatWind', () => {
     it('formats wind speed in metric units', () => {
-      expect(formatWind(5.5, 'metric')).toBe('5.5 m/s')
-      expect(formatWind(0, 'metric')).toBe('0 m/s')
+      expect(formatWind(5.5, 'metric')).toBe('5.5 km/h')
+      expect(formatWind(0, 'metric')).toBe('0 km/h')
     })
 
     it('formats wind speed in imperial units', () => {

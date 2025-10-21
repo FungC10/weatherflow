@@ -6,7 +6,7 @@ export function formatTemp(temp: number, units: Units): string {
 }
 
 export function formatWind(speed: number, units: Units): string {
-  const unit = units === 'metric' ? 'm/s' : 'mph';
+  const unit = units === 'metric' ? 'km/h' : 'mph';
   return `${Math.round(speed * 10) / 10} ${unit}`;
 }
 
