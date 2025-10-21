@@ -22,90 +22,97 @@ Focus: quick search → clear results → graceful states. Works without login o
 
 ⸻
 
-2) Tech Stack
-Layer
-Tech
-Purpose
-App
-React + TypeScript
-UI & logic
-Styling
-Tailwind CSS
-Utility styling (responsive & accessible)
-HTTP / Cache
-TanStack Query (recommended)
-Request caching, retries, dedup
-Maps
-Leaflet + react-leaflet
-Map tiles, markers, interactions
-Icons
-Heroicons / custom weather SVG
-Clear iconography
-Animations
-Framer Motion (lightweight use)
-Page and component transitions
-Build/Deploy
-Vite or Next.js (App Router)
-Local dev + Vercel deploy (either is fine)
-QA
-Vitest + Testing Library
-Unit & component tests
-Lint/Format
-ESLint + Prettier
-Consistent codebase
+## 2) Tech Stack
+
+| Layer | Tech | Purpose |
+|-------|------|---------|
+| **App** | Next.js 14 + TypeScript | App Router, SSR, type safety |
+| **Styling** | Tailwind CSS + @tailwindcss/postcss | Utility styling (responsive & accessible) |
+| **HTTP / Cache** | TanStack Query | Request caching, retries, dedup |
+| **Maps** | Leaflet + react-leaflet | Map tiles, markers, interactions |
+| **Icons** | Heroicons / custom weather SVG | Clear iconography |
+| **Animations** | Framer Motion | Page and component transitions |
+| **Forms** | React Hook Form | Form handling and validation |
+| **Build/Deploy** | Next.js + Vercel | Local dev + production deploy |
+| **QA** | Vitest + Testing Library | Unit & component tests |
+| **Lint/Format** | ESLint + Prettier | Consistent codebase |
 
 ⸻
 
-3) Directory Structure
+## 3) Directory Structure
+
+```
 /src
-  /app                      # (Next.js) or just /pages for Vite SPA routing
-    page.tsx                # Home (search-first)
-    /city/[slug]/page.tsx   # City detail page (optional deep link)
-  /components
-    SearchBar.tsx
-    CurrentCard.tsx
-    ForecastList.tsx
-    ForecastItem.tsx
-    MapPanel.tsx
-    UnitToggle.tsx
-    EmptyState.tsx
-    ErrorState.tsx
-    LoadingShimmer.tsx
-  /lib
-    api.ts                  # Fetchers (current, forecast, geocoding)
-    queryKeys.ts            # TanStack Query keys
-    format.ts               # Date/number/unit helpers
-    weatherIcon.ts          # Code → icon mapping
-    geo.ts                  # Geolocation helpers & permission gates
-    storage.ts              # Local storage helpers (recent searches, units)
-    types.ts                # Weather/geo TypeScript types
-  /styles
-    globals.css             # Tailwind base + design tokens
-  /assets
-    icons/                  # SVGs for weather conditions
-  /tests
-    components/*.test.tsx
-    lib/*.test.ts
+├── /app                    # Next.js App Router
+│   ├── layout.tsx          # Root layout with QueryProvider
+│   ├── page.tsx            # Home (search-first)
+│   └── /city/[slug]/page.tsx  # City detail page (optional deep link)
+├── /components             # React components
+│   ├── SearchBar.tsx
+│   ├── CurrentCard.tsx
+│   ├── ForecastList.tsx
+│   ├── ForecastItem.tsx
+│   ├── MapPanel.tsx
+│   ├── UnitToggle.tsx
+│   ├── EmptyState.tsx
+│   ├── ErrorState.tsx
+│   └── LoadingShimmer.tsx
+├── /lib                    # Utilities and configurations
+│   ├── queryClient.tsx     # TanStack Query setup
+│   ├── api.ts              # Fetchers (current, forecast, geocoding)
+│   ├── queryKeys.ts        # TanStack Query keys
+│   ├── format.ts           # Date/number/unit helpers
+│   ├── weatherIcon.ts      # Code → icon mapping
+│   ├── geo.ts              # Geolocation helpers & permission gates
+│   ├── storage.ts          # Local storage helpers (recent searches, units)
+│   └── types.ts            # Weather/geo TypeScript types
+├── /styles
+│   └── globals.css         # Tailwind base + design tokens
+├── /assets
+│   └── icons/              # SVGs for weather conditions
+└── /tests
+    ├── components/*.test.tsx
+    └── lib/*.test.ts
+
+# Configuration files
 .env.example                # OWM key + map tile URL
+tailwind.config.js          # Tailwind configuration
+postcss.config.js           # PostCSS with @tailwindcss/postcss
+next.config.js              # Next.js configuration
+tsconfig.json               # TypeScript configuration
+```
 
 ⸻
 
-4) Environment & Secrets
-# .env example
-VITE_OWM_API_KEY=xxxxxx                # OpenWeatherMap API Key
-VITE_TILE_URL=https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png
-VITE_TILE_ATTRIBUTION="© OpenStreetMap contributors"
-	•	Never commit real keys.
-	•	Provide an .env.example with placeholders.
-	•	In Next.js, use NEXT_PUBLIC_... prefixes.
+## 4) Environment & Secrets
+
+```bash
+# .env.example
+NEXT_PUBLIC_OWM_API_KEY=__REPLACE_ME__                    # OpenWeatherMap API Key
+NEXT_PUBLIC_TILE_URL=https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png
+NEXT_PUBLIC_TILE_ATTRIBUTION=© OpenStreetMap contributors
+```
+
+**Security Notes:**
+- ✅ Never commit real keys
+- ✅ Provide an `.env.example` with placeholders
+- ✅ In Next.js, use `NEXT_PUBLIC_...` prefixes for client-side env vars
+- ✅ Add `.env*.local` to `.gitignore`
 
 ⸻
 
-5) Data Model (simplified)
+## 5) Data Model (simplified)
+
+```typescript
 // src/lib/types.ts
 export type Units = 'metric' | 'imperial';
 
-export type GeoPoint = { lat: number; lon: number; name?: string; country?: string };
+export type GeoPoint = { 
+  lat: number; 
+  lon: number; 
+  name?: string; 
+  country?: string; 
+};
 
 export type CurrentWeather = {
   coord: { lat: number; lon: number };
@@ -127,10 +134,36 @@ export type Forecast = {
   timezone_offset: number;
   daily: DailyForecast[];
 };
+```
 
 ⸻
 
-6) API Layer
+## 6) Setup & Configuration
+
+### **Next.js 14 Configuration**
+- ✅ App Router enabled by default (no experimental flags needed)
+- ✅ TypeScript with strict mode enabled
+- ✅ Path aliases configured (`@/*` → `./src/*`)
+
+### **Tailwind CSS Setup**
+- ✅ Uses `@tailwindcss/postcss` plugin (required for Next.js 15+)
+- ✅ Dark theme with slate-900 background and cyan-300 accents
+- ✅ PostCSS configuration with autoprefixer
+
+### **TanStack Query Integration**
+- ✅ QueryClient provider in root layout
+- ✅ Default options: 5min staleTime, 2 retries, no window focus refetch
+- ✅ Client-side only (wrapped in 'use client' directive)
+
+### **Project Structure**
+- ✅ Clean separation: `/app`, `/components`, `/lib`, `/styles`
+- ✅ TypeScript types defined in `/lib/types.ts`
+- ✅ Storage utilities in `/lib/storage.ts`
+- ✅ Environment variables properly configured
+
+⸻
+
+## 7) API Layer
 
 Vendor: OpenWeatherMap (OWM)
 Endpoints used (typical choices):
@@ -138,12 +171,13 @@ Endpoints used (typical choices):
 	•	Current: /data/2.5/weather?lat={lat}&lon={lon}&units={u}&appid=...
 	•	OneCall (forecast): /data/3.0/onecall?lat={lat}&lon={lon}&exclude=minutely,hourly,alerts&units={u}&appid=...
 
-Fetcher design
+### **Fetcher Design**
+```typescript
 // src/lib/api.ts
 import { CurrentWeather, Forecast, GeoPoint, Units } from './types';
 
 const BASE = 'https://api.openweathermap.org';
-const KEY = import.meta.env.VITE_OWM_API_KEY;
+const KEY = process.env.NEXT_PUBLIC_OWM_API_KEY;
 
 export async function searchCity(q: string): Promise<GeoPoint[]> {
   const url = `${BASE}/geo/1.0/direct?q=${encodeURIComponent(q)}&limit=5&appid=${KEY}`;
@@ -166,20 +200,22 @@ export async function getForecast(lat: number, lon: number, units: Units): Promi
   if (!res.ok) throw new Error('Failed forecast');
   return res.json();
 }
-Caching strategy (TanStack Query)
-	•	Keys: ['city', q], ['current', lat, lon, units], ['forecast', lat, lon, units]
-	•	staleTime: 5–10 minutes for current; 30 minutes for forecast
-	•	retry: 1–2 times; no retry on 4xx
-	•	Request dedupe: Query client handles parallel calls
+```
 
-Rate-limit hygiene
-	•	Debounce search input (300–500ms)
-	•	Cancel in-flight requests on new queries
-	•	Cache city results for session
+### **Caching Strategy (TanStack Query)**
+- **Keys**: `['city', q]`, `['current', lat, lon, units]`, `['forecast', lat, lon, units]`
+- **staleTime**: 5–10 minutes for current; 30 minutes for forecast
+- **retry**: 1–2 times; no retry on 4xx
+- **Request dedupe**: Query client handles parallel calls
+
+### **Rate-limit Hygiene**
+- **Debounce** search input (300–500ms)
+- **Cancel** in-flight requests on new queries
+- **Cache** city results for session
 
 ⸻
 
-7) State & Data Flow
+## 8) State & Data Flow
 
 User
 → types in city or grants geolocation
@@ -322,7 +358,48 @@ export const askLocation = (): Promise<GeolocationPosition> =>
 
 ⸻
 
-19) Summary
+## 19) Troubleshooting
+
+### **Common Setup Issues**
+
+#### **Tailwind CSS PostCSS Error**
+```
+Error: It looks like you're trying to use `tailwindcss` directly as a PostCSS plugin
+```
+**Solution**: Install `@tailwindcss/postcss` and update `postcss.config.js`:
+```bash
+npm install @tailwindcss/postcss
+```
+```js
+// postcss.config.js
+module.exports = {
+  plugins: {
+    '@tailwindcss/postcss': {},
+    autoprefixer: {},
+  },
+}
+```
+
+#### **Next.js 15 Configuration Warning**
+```
+Invalid next.config.js options detected: Unrecognized key(s) in object: 'appDir'
+```
+**Solution**: Remove deprecated `experimental.appDir` - App Router is enabled by default in Next.js 13+.
+
+#### **Environment Variables Not Working**
+**Solution**: Ensure variables use `NEXT_PUBLIC_` prefix for client-side access:
+```bash
+NEXT_PUBLIC_OWM_API_KEY=your_key_here
+```
+
+### **Development Server Issues**
+- **Port conflicts**: Kill existing processes with `lsof -ti:3000 | xargs kill -9`
+- **Cache issues**: Clear `.next` folder and restart dev server
+- **TypeScript errors**: Check `tsconfig.json` path aliases are correct
+
+⸻
+
+## 20) Summary
 
 WeatherFlow is a compact, search-centric weather app that highlights:
 	•	Clean API orchestration with cached queries
