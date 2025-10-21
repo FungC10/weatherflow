@@ -1,0 +1,25 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="240" fill="#0f172a" stroke="#22d3ee" stroke-width="32"/>
+  
+  <!-- Cloud -->
+  <path d="M160 200c0-44.2 35.8-80 80-80s80 35.8 80 80c17.7 0 32 14.3 32 32s-14.3 32-32 32H160c-17.7 0-32-14.3-32-32s14.3-32 32-32z" fill="#22d3ee"/>
+  
+  <!-- Sun rays -->
+  <g fill="#fbbf24" opacity="0.8">
+    <rect x="256" y="80" width="8" height="32" rx="4"/>
+    <rect x="256" y="400" width="8" height="32" rx="4"/>
+    <rect x="80" y="256" width="32" height="8" rx="4"/>
+    <rect x="400" y="256" width="32" height="8" rx="4"/>
+    <rect x="120" y="120" width="6" height="24" rx="3" transform="rotate(45 120 120)"/>
+    <rect x="386" y="386" width="6" height="24" rx="3" transform="rotate(45 386 386)"/>
+    <rect x="386" y="120" width="6" height="24" rx="3" transform="rotate(-45 386 120)"/>
+    <rect x="120" y="386" width="6" height="24" rx="3" transform="rotate(-45 120 386)"/>
+  </g>
+  
+  <!-- Temperature lines -->
+  <rect x="200" y="320" width="4" height="80" rx="2" fill="#22d3ee"/>
+  <rect x="200" y="320" width="40" height="4" rx="2" fill="#22d3ee"/>
+  <rect x="200" y="340" width="30" height="4" rx="2" fill="#22d3ee"/>
+  <rect x="200" y="360" width="20" height="4" rx="2" fill="#22d3ee"/>
+</svg>
