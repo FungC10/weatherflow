@@ -28,8 +28,13 @@ export default function Home() {
     error: weatherError 
   } = useQuery({
     queryKey: selectedCity ? queryKeys.current(selectedCity.lat, selectedCity.lon, units) : ['no-query'],
-    queryFn: () => selectedCity ? getCurrent(selectedCity.lat, selectedCity.lon, units) : null,
-    enabled: !!selectedCity,
+    queryFn: async () => {
+      if (!selectedCity) return null;
+      // Only fetch on client side
+      if (typeof window === 'undefined') return null;
+      return getCurrent(selectedCity.lat, selectedCity.lon, units);
+    },
+    enabled: !!selectedCity && typeof window !== 'undefined',
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 2,
   });
