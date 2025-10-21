@@ -102,7 +102,11 @@ export default function Home() {
             <EmptyState 
               action={{
                 label: "Search for a city",
-                onClick: () => document.querySelector('input')?.focus()
+                onClick: () => {
+                  if (typeof window !== 'undefined') {
+                    document.querySelector('input')?.focus();
+                  }
+                }
               }}
             />
           )}
