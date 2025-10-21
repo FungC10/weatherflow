@@ -1,14 +1,5 @@
-import { GeoPoint, Units } from '@/lib/types';
-
-interface CurrentWeather {
-  coord: { lat: number; lon: number };
-  dt: number;
-  timezone: number;
-  name: string;
-  weather: { id: number; main: string; description: string; icon: string }[];
-  main: { temp: number; feels_like: number; humidity: number; pressure: number };
-  wind: { speed: number; deg: number };
-}
+import { GeoPoint, Units, CurrentWeather } from '@/lib/types';
+import { formatTemp, formatWind, formatPressure, formatDate, getWindDirection } from '@/lib/format';
 
 interface CurrentCardProps {
   weather?: CurrentWeather;
@@ -46,30 +37,21 @@ export default function CurrentCard({ weather, location, units, isLoading = fals
     );
   }
 
-  const tempUnit = units === 'metric' ? '°C' : '°F';
-  const speedUnit = units === 'metric' ? 'm/s' : 'mph';
-  const pressureUnit = units === 'metric' ? 'hPa' : 'inHg';
-
   return (
     <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-2xl font-bold text-slate-100">{weather.name}</h2>
           <p className="text-slate-400 text-sm">
-            {new Date(weather.dt * 1000).toLocaleDateString('en-US', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            })}
+            {formatDate(weather.dt, weather.timezone)}
           </p>
         </div>
         <div className="text-right">
           <div className="text-4xl font-bold text-cyan-300">
-            {Math.round(weather.main.temp)}{tempUnit}
+            {formatTemp(weather.main.temp, units)}
           </div>
           <p className="text-slate-400 text-sm">
-            Feels like {Math.round(weather.main.feels_like)}{tempUnit}
+            Feels like {formatTemp(weather.main.feels_like, units)}
           </p>
         </div>
       </div>
@@ -78,7 +60,7 @@ export default function CurrentCard({ weather, location, units, isLoading = fals
         <div className="flex items-center space-x-2">
           <span className="text-slate-400">💨</span>
           <span className="text-slate-300">
-            {weather.wind.speed} {speedUnit}
+            {formatWind(weather.wind.speed, units)} {getWindDirection(weather.wind.deg)}
           </span>
         </div>
         <div className="flex items-center space-x-2">
@@ -90,7 +72,7 @@ export default function CurrentCard({ weather, location, units, isLoading = fals
         <div className="flex items-center space-x-2">
           <span className="text-slate-400">📊</span>
           <span className="text-slate-300">
-            {weather.main.pressure} {pressureUnit}
+            {formatPressure(weather.main.pressure, units)}
           </span>
         </div>
         <div className="flex items-center space-x-2">

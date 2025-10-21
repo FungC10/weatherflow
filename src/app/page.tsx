@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import SearchBar from '@/components/SearchBar';
 import UnitToggle from '@/components/UnitToggle';
 import CurrentCard from '@/components/CurrentCard';
@@ -9,31 +10,31 @@ import EmptyState from '@/components/EmptyState';
 import ErrorState from '@/components/ErrorState';
 import LoadingShimmer from '@/components/LoadingShimmer';
 import { Units, GeoPoint } from '@/lib/types';
+import { getCurrent } from '@/lib/api';
+import { queryKeys } from '@/lib/queryKeys';
 
 type AppState = 'empty' | 'loading' | 'error' | 'success';
 
 export default function Home() {
-  const [state, setState] = useState<AppState>('empty');
   const [selectedCity, setSelectedCity] = useState<GeoPoint | null>(null);
   const [units, setUnits] = useState<Units>('metric');
   const [searchQuery, setSearchQuery] = useState('');
+  const queryClient = useQueryClient();
 
-  // Mock data for demonstration
-  const mockWeather = selectedCity ? {
-    coord: { lat: selectedCity.lat, lon: selectedCity.lon },
-    dt: Date.now() / 1000,
-    timezone: 0,
-    name: selectedCity.name || 'Unknown City',
-    weather: [{ id: 800, main: 'Clear', description: 'clear sky', icon: '01d' }],
-    main: { 
-      temp: units === 'metric' ? 22 : 72, 
-      feels_like: units === 'metric' ? 24 : 75, 
-      humidity: 65, 
-      pressure: 1013 
-    },
-    wind: { speed: units === 'metric' ? 3.5 : 7.8, deg: 180 }
-  } : null;
+  // Fetch current weather when city is selected
+  const { 
+    data: currentWeather, 
+    isLoading: isLoadingWeather, 
+    error: weatherError 
+  } = useQuery({
+    queryKey: selectedCity ? queryKeys.current(selectedCity.lat, selectedCity.lon, units) : ['no-query'],
+    queryFn: () => selectedCity ? getCurrent(selectedCity.lat, selectedCity.lon, units) : null,
+    enabled: !!selectedCity,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 2,
+  });
 
+  // Mock forecasts for now (will be implemented later)
   const mockForecasts = selectedCity ? Array.from({ length: 5 }, (_, i) => ({
     dt: (Date.now() / 1000) + (i * 86400),
     temp: { 
@@ -47,37 +48,39 @@ export default function Home() {
     if (!query.trim()) return;
     
     setSearchQuery(query);
-    setState('loading');
     
-    // Simulate API call delay
-    setTimeout(() => {
-      // Mock city selection
-      const mockCity: GeoPoint = {
-        lat: 40.7128 + (Math.random() - 0.5) * 0.1,
-        lon: -74.0060 + (Math.random() - 0.5) * 0.1,
-        name: query,
-        country: 'US'
-      };
-      
-      setSelectedCity(mockCity);
-      setState('success');
-    }, 1000);
+    // Mock city selection for now (will be replaced with real geocoding)
+    const mockCity: GeoPoint = {
+      lat: 40.7128 + (Math.random() - 0.5) * 0.1,
+      lon: -74.0060 + (Math.random() - 0.5) * 0.1,
+      name: query,
+      country: 'US'
+    };
+    
+    setSelectedCity(mockCity);
   };
 
   const handleUnitsChange = (newUnits: Units) => {
     setUnits(newUnits);
+    // Invalidate current weather query to refetch with new units
+    if (selectedCity) {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.current(selectedCity.lat, selectedCity.lon, units)
+      });
+    }
   };
 
   const handleRetry = () => {
-    if (searchQuery) {
-      handleSearch(searchQuery);
+    if (selectedCity) {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.current(selectedCity.lat, selectedCity.lon, units)
+      });
     }
   };
 
   const handleClearSearch = () => {
     setSearchQuery('');
     setSelectedCity(null);
-    setState('empty');
   };
 
   return (
@@ -98,7 +101,7 @@ export default function Home() {
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
-          {state === 'empty' && (
+          {!selectedCity && (
             <EmptyState 
               action={{
                 label: "Search for a city",
@@ -111,15 +114,19 @@ export default function Home() {
             />
           )}
 
-          {state === 'loading' && (
+          {selectedCity && isLoadingWeather && (
             <LoadingShimmer type="full" />
           )}
 
-          {state === 'error' && (
-            <ErrorState onRetry={handleRetry} />
+          {selectedCity && weatherError && (
+            <ErrorState 
+              title="Failed to load weather data"
+              message={weatherError instanceof Error ? weatherError.message : 'Something went wrong'}
+              onRetry={handleRetry} 
+            />
           )}
 
-          {state === 'success' && selectedCity && (
+          {selectedCity && currentWeather && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold text-slate-200">
@@ -134,7 +141,7 @@ export default function Home() {
               </div>
               
               <CurrentCard 
-                weather={mockWeather || undefined}
+                weather={currentWeather}
                 location={selectedCity}
                 units={units}
               />
