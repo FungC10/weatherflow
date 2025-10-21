@@ -14,6 +14,20 @@ import { getCurrent, getForecast } from '@/lib/api';
 import { queryKeys } from '@/lib/queryKeys';
 import { askLocation, getLocationErrorMessage, GeoLocationError } from '@/lib/geo';
 import { addRecentSearch } from '@/lib/storage';
+import dynamic from 'next/dynamic';
+
+// Lazy-load MapPanel to protect initial bundle
+const MapPanel = dynamic(() => import('@/components/MapPanel'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-64 bg-slate-800/50 rounded-lg border border-slate-700/30 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-cyan-400 border-t-transparent mx-auto mb-2"></div>
+        <p className="text-slate-400 text-sm">Loading map...</p>
+      </div>
+    </div>
+  )
+});
 
 type AppState = 'empty' | 'loading' | 'error' | 'success';
 
@@ -23,6 +37,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [locationError, setLocationError] = useState<string | null>(null);
   const [isRequestingLocation, setIsRequestingLocation] = useState(false);
+  const [showMap, setShowMap] = useState(false);
   const queryClient = useQueryClient();
 
   // Fetch current weather when city is selected
@@ -231,6 +246,28 @@ export default function Home() {
                 location={selectedCity}
                 units={units}
               />
+              
+              {/* Map Toggle and Panel */}
+              <div className="space-y-3">
+                <button
+                  onClick={() => setShowMap(!showMap)}
+                  className="flex items-center space-x-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                  </svg>
+                  <span>{showMap ? 'Hide map' : 'Show map'}</span>
+                </button>
+                
+                {showMap && (
+                  <MapPanel
+                    city={selectedCity}
+                    currentWeather={currentWeather}
+                    units={units}
+                    isVisible={showMap}
+                  />
+                )}
+              </div>
               
               <ForecastList 
                 forecasts={forecasts}
