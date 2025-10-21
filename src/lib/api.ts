@@ -6,6 +6,7 @@ import {
   OpenMeteoGeocodingResult,
   OpenMeteoForecastResponse 
 } from './types';
+import { getOpenMeteoWeatherIcon, getOpenMeteoWeatherEmoji, getOpenMeteoWeatherDescription, isOpenMeteoDayTime } from './weatherIconOpenMeteo';
 
 const GEOCODING_BASE_URL = 'https://geocoding-api.open-meteo.com/v1';
 const FORECAST_BASE_URL = 'https://api.open-meteo.com/v1';
@@ -70,32 +71,34 @@ async function getCurrentOpenMeteo(lat: number, lon: number, units: Units): Prom
   
   const data: OpenMeteoForecastResponse = await response.json();
   
-  // Convert Open-Meteo format to our UI format
-  const current = data.current;
-  const timestamp = Math.floor(new Date(current.time).getTime() / 1000);
-  
-  return {
-    coord: { lat: data.latitude, lon: data.longitude },
-    dt: timestamp,
-    timezone: data.utc_offset_seconds,
-    name: `${data.latitude.toFixed(2)}, ${data.longitude.toFixed(2)}`, // Will be overridden by city name
-    weather: [{
-      id: current.weathercode,
-      main: getWeatherMain(current.weathercode),
-      description: getWeatherDescription(current.weathercode),
-      icon: getWeatherIcon(current.weathercode)
-    }],
-    main: {
-      temp: current.temperature_2m,
-      feels_like: current.temperature_2m, // Open-Meteo doesn't provide feels_like
-      humidity: current.relative_humidity_2m,
-      pressure: 1013 // Open-Meteo doesn't provide pressure in free tier
-    },
-    wind: {
-      speed: current.wind_speed_10m,
-      deg: current.wind_direction_10m
-    }
-  };
+          // Convert Open-Meteo format to our UI format
+          const current = data.current;
+          const timestamp = Math.floor(new Date(current.time).getTime() / 1000);
+          const isDay = isOpenMeteoDayTime(timestamp);
+          const weatherIcon = getOpenMeteoWeatherIcon(current.weathercode, isDay);
+          
+          return {
+            coord: { lat: data.latitude, lon: data.longitude },
+            dt: timestamp,
+            timezone: data.utc_offset_seconds,
+            name: `${data.latitude.toFixed(2)}, ${data.longitude.toFixed(2)}`, // Will be overridden by city name
+            weather: [{
+              id: current.weathercode,
+              main: getWeatherMain(current.weathercode),
+              description: getOpenMeteoWeatherDescription(current.weathercode),
+              icon: weatherIcon
+            }],
+            main: {
+              temp: current.temperature_2m,
+              feels_like: current.temperature_2m, // Open-Meteo doesn't provide feels_like
+              humidity: current.relative_humidity_2m,
+              pressure: 1013 // Open-Meteo doesn't provide pressure in free tier
+            },
+            wind: {
+              speed: current.wind_speed_10m,
+              deg: current.wind_direction_10m
+            }
+          };
 }
 
 // OpenWeatherMap implementation
@@ -134,21 +137,27 @@ export async function getForecast(lat: number, lon: number, units: Units): Promi
     
     const data: OpenMeteoForecastResponse = await response.json();
     
-    // Convert Open-Meteo format to our UI format
-    const daily = data.daily;
-    const dailyForecasts = daily.time.map((time, index) => ({
-      dt: Math.floor(new Date(time).getTime() / 1000),
-      temp: {
-        min: daily.temperature_2m_min[index],
-        max: daily.temperature_2m_max[index]
-      },
-      weather: [{
-        id: daily.weathercode[index],
-        main: getWeatherMain(daily.weathercode[index]),
-        description: getWeatherDescription(daily.weathercode[index]),
-        icon: getWeatherIcon(daily.weathercode[index])
-      }]
-    }));
+            // Convert Open-Meteo format to our UI format
+            const daily = data.daily;
+            const dailyForecasts = daily.time.map((time, index) => {
+              const timestamp = Math.floor(new Date(time).getTime() / 1000);
+              const isDay = isOpenMeteoDayTime(timestamp);
+              const weatherIcon = getOpenMeteoWeatherIcon(daily.weathercode[index], isDay);
+              
+              return {
+                dt: timestamp,
+                temp: {
+                  min: daily.temperature_2m_min[index],
+                  max: daily.temperature_2m_max[index]
+                },
+                weather: [{
+                  id: daily.weathercode[index],
+                  main: getWeatherMain(daily.weathercode[index]),
+                  description: getOpenMeteoWeatherDescription(daily.weathercode[index]),
+                  icon: weatherIcon
+                }]
+              };
+            });
     
     return {
       timezone_offset: data.utc_offset_seconds,

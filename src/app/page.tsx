@@ -251,6 +251,7 @@ export default function Home() {
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
+          {/* Empty State - only show when no city is selected */}
           {!selectedCity && (
             <EmptyState 
               action={{
@@ -264,6 +265,7 @@ export default function Home() {
             />
           )}
 
+          {/* Loading State - only show when city is selected and loading */}
           {selectedCity && (isLoadingWeather || isLoadingForecast) && (
             <LoadingShimmer 
               type="full" 
@@ -271,7 +273,8 @@ export default function Home() {
             />
           )}
 
-          {selectedCity && (weatherError || forecastError) && (
+          {/* Error State - only show when city is selected and there's an error */}
+          {selectedCity && (weatherError || forecastError) && !isLoadingWeather && !isLoadingForecast && (
             <ErrorState 
               title="Failed to load weather data"
               message={
@@ -284,7 +287,8 @@ export default function Home() {
             />
           )}
 
-          {selectedCity && currentWeather && (
+          {/* Weather Content - only show when city is selected and data is loaded */}
+          {selectedCity && currentWeather && !isLoadingWeather && !isLoadingForecast && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold text-slate-200">
