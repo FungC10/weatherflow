@@ -16,3 +16,14 @@ export type CurrentWeather = {
   main: { temp: number; feels_like: number; humidity: number; pressure: number };
   wind: { speed: number; deg: number };
 };
+
+export type DailyForecast = {
+  dt: number;
+  temp: { min: number; max: number };
+  weather: { id: number; main: string; description: string; icon: string }[];
+};
+
+export type Forecast = {
+  timezone_offset: number;
+  daily: DailyForecast[];
+};

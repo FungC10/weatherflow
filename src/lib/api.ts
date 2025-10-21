@@ -1,4 +1,4 @@
-import { CurrentWeather, Units } from './types';
+import { CurrentWeather, Forecast, Units } from './types';
 
 const BASE_URL = 'https://api.openweathermap.org';
 
@@ -33,6 +33,29 @@ export async function getCurrent(lat: number, lon: number, units: Units): Promis
       throw new Error('API rate limit exceeded. Please try again later.');
     }
     throw new Error(`Failed to fetch weather data: ${response.status} ${response.statusText}`);
+  }
+  
+  const data = await response.json();
+  return data;
+}
+
+export async function getForecast(lat: number, lon: number, units: Units): Promise<Forecast> {
+  const apiKey = getApiKey();
+  const url = `${BASE_URL}/data/3.0/onecall?lat=${lat}&lon=${lon}&units=${units}&exclude=minutely,hourly,alerts&appid=${apiKey}`;
+  
+  const response = await fetch(url);
+  
+  if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error('Invalid API key. Please check your OpenWeatherMap API key.');
+    }
+    if (response.status === 404) {
+      throw new Error('Forecast data not found for this location.');
+    }
+    if (response.status === 429) {
+      throw new Error('API rate limit exceeded. Please try again later.');
+    }
+    throw new Error(`Failed to fetch forecast data: ${response.status} ${response.statusText}`);
   }
   
   const data = await response.json();

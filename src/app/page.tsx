@@ -10,7 +10,7 @@ import EmptyState from '@/components/EmptyState';
 import ErrorState from '@/components/ErrorState';
 import LoadingShimmer from '@/components/LoadingShimmer';
 import { Units, GeoPoint } from '@/lib/types';
-import { getCurrent } from '@/lib/api';
+import { getCurrent, getForecast } from '@/lib/api';
 import { queryKeys } from '@/lib/queryKeys';
 
 type AppState = 'empty' | 'loading' | 'error' | 'success';
@@ -39,15 +39,26 @@ export default function Home() {
     retry: 2,
   });
 
-  // Mock forecasts for now (will be implemented later)
-  const mockForecasts = selectedCity ? Array.from({ length: 5 }, (_, i) => ({
-    dt: (Date.now() / 1000) + (i * 86400),
-    temp: { 
-      min: units === 'metric' ? 15 + i : 59 + i, 
-      max: units === 'metric' ? 25 + i : 77 + i 
+  // Fetch forecast when city is selected
+  const { 
+    data: forecastData, 
+    isLoading: isLoadingForecast, 
+    error: forecastError 
+  } = useQuery({
+    queryKey: selectedCity ? queryKeys.forecast(selectedCity.lat, selectedCity.lon, units) : ['no-forecast-query'],
+    queryFn: async () => {
+      if (!selectedCity) return null;
+      // Only fetch on client side
+      if (typeof window === 'undefined') return null;
+      return getForecast(selectedCity.lat, selectedCity.lon, units);
     },
-    weather: [{ id: 800, main: 'Clear', description: 'clear sky', icon: '01d' }]
-  })) : [];
+    enabled: !!selectedCity && typeof window !== 'undefined',
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    retry: 2,
+  });
+
+  // Get forecast data from API
+  const forecasts = forecastData?.daily || [];
 
   const handleSearch = (query: string) => {
     if (!query.trim()) return;
@@ -67,10 +78,13 @@ export default function Home() {
 
   const handleUnitsChange = (newUnits: Units) => {
     setUnits(newUnits);
-    // Invalidate current weather query to refetch with new units
+    // Invalidate both current weather and forecast queries to refetch with new units
     if (selectedCity) {
       queryClient.invalidateQueries({
         queryKey: queryKeys.current(selectedCity.lat, selectedCity.lon, units)
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.forecast(selectedCity.lat, selectedCity.lon, units)
       });
     }
   };
@@ -79,6 +93,9 @@ export default function Home() {
     if (selectedCity) {
       queryClient.invalidateQueries({
         queryKey: queryKeys.current(selectedCity.lat, selectedCity.lon, units)
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.forecast(selectedCity.lat, selectedCity.lon, units)
       });
     }
   };
@@ -119,14 +136,18 @@ export default function Home() {
             />
           )}
 
-          {selectedCity && isLoadingWeather && (
+          {selectedCity && (isLoadingWeather || isLoadingForecast) && (
             <LoadingShimmer type="full" />
           )}
 
-          {selectedCity && weatherError && (
+          {selectedCity && (weatherError || forecastError) && (
             <ErrorState 
               title="Failed to load weather data"
-              message={weatherError instanceof Error ? weatherError.message : 'Something went wrong'}
+              message={
+                weatherError instanceof Error ? weatherError.message :
+                forecastError instanceof Error ? forecastError.message :
+                'Something went wrong'
+              }
               onRetry={handleRetry} 
             />
           )}
@@ -152,8 +173,9 @@ export default function Home() {
               />
               
               <ForecastList 
-                forecasts={mockForecasts}
+                forecasts={forecasts}
                 units={units}
+                isLoading={isLoadingForecast}
               />
             </div>
           )}

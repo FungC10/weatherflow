@@ -1,11 +1,6 @@
-import { Units } from '@/lib/types';
+import { Units, DailyForecast } from '@/lib/types';
 import ForecastItem from './ForecastItem';
-
-interface DailyForecast {
-  dt: number;
-  temp: { min: number; max: number };
-  weather: { id: number; main: string; description: string; icon: string }[];
-}
+import { motion } from 'framer-motion';
 
 interface ForecastListProps {
   forecasts?: DailyForecast[];
@@ -53,16 +48,31 @@ export default function ForecastList({ forecasts, units, isLoading = false }: Fo
   return (
     <div className="space-y-3">
       <h3 className="text-lg font-semibold text-slate-200 mb-4">5-Day Forecast</h3>
-      <div className="space-y-2">
+      <motion.div 
+        className="space-y-2"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+      >
         {forecasts.slice(0, 5).map((forecast, index) => (
-          <ForecastItem
+          <motion.div
             key={forecast.dt}
-            forecast={forecast}
-            units={units}
-            isToday={index === 0}
-          />
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ 
+              duration: 0.3, 
+              delay: index * 0.1,
+              ease: "easeOut"
+            }}
+          >
+            <ForecastItem
+              forecast={forecast}
+              units={units}
+              isToday={index === 0}
+            />
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     </div>
   );
 }
