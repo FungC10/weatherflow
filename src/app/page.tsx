@@ -160,7 +160,8 @@ export default function Home() {
     // Focus search input after clearing
     if (typeof window !== 'undefined') {
       setTimeout(() => {
-        document.querySelector('input[type="text"]')?.focus();
+        const input = document.querySelector('input[type="text"]') as HTMLInputElement | null;
+        input?.focus();
       }, 100);
     }
   };
