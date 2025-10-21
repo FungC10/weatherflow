@@ -94,7 +94,9 @@ export function getVariedWeatherEmoji(code: number, icon: WeatherIcon, timestamp
   if (code === 3) {
     const overcastEmojis = ['☁️', '🌥️', '☁️', '🌤️', '☁️'];
     // Use timestamp to get more varied results based on the actual day
-    const index = timestamp ? Math.floor(timestamp / 86400) % overcastEmojis.length : code % overcastEmojis.length;
+    // Add some randomness based on the day of year to ensure variety
+    const dayOfYear = timestamp ? Math.floor(timestamp / 86400) : 0;
+    const index = (dayOfYear + code) % overcastEmojis.length;
     return overcastEmojis[index];
   }
   
@@ -142,7 +144,9 @@ export function getVariedWeatherDescription(code: number, timestamp?: number): s
   if (code === 3) {
     const overcastDescriptions = ['Cloudy', 'Overcast', 'Cloudy skies', 'Overcast skies', 'Cloudy conditions'];
     // Use timestamp to get more varied results based on the actual day
-    const index = timestamp ? Math.floor(timestamp / 86400) % overcastDescriptions.length : code % overcastDescriptions.length;
+    // Add some randomness based on the day of year to ensure variety
+    const dayOfYear = timestamp ? Math.floor(timestamp / 86400) : 0;
+    const index = (dayOfYear + code) % overcastDescriptions.length;
     return overcastDescriptions[index];
   }
   

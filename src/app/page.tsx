@@ -15,6 +15,7 @@ import { askLocation, getLocationErrorMessage, GeoLocationError } from '@/lib/ge
 import { addRecentSearch } from '@/lib/storage';
 import { generateCityUrl } from '@/lib/cityUtils';
 import ShareButton from '@/components/ShareButton';
+import OfflineIndicator from '@/components/OfflineIndicator';
 import dynamic from 'next/dynamic';
 
 // Lazy-load MapPanel to protect initial bundle
@@ -345,6 +346,14 @@ export default function Home() {
                   />
                 )}
               </div>
+              
+              {/* Offline indicator for cached data */}
+              {forecastData && forecastData._cached && forecastData._cachedAt && (
+                <OfflineIndicator 
+                  timestamp={forecastData._cachedAt}
+                  className="mb-4"
+                />
+              )}
               
               <ForecastList 
                 forecasts={forecasts}

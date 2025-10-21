@@ -1,5 +1,6 @@
 // Service Worker for WeatherFlow PWA
 const CACHE_NAME = 'weatherflow-v1';
+const FORECAST_CACHE_NAME = 'weatherflow-last';
 const STATIC_CACHE_URLS = [
   '/',
   '/manifest.webmanifest',
@@ -54,7 +55,13 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Skip cross-origin requests
+  // Handle forecast API requests specially
+  if (event.request.url.includes('api.open-meteo.com/v1/forecast')) {
+    event.respondWith(handleForecastRequest(event.request));
+    return;
+  }
+
+  // Skip cross-origin requests for other APIs
   if (!event.request.url.startsWith(self.location.origin)) {
     return;
   }
@@ -101,6 +108,46 @@ self.addEventListener('fetch', (event) => {
       })
   );
 });
+
+// Handle forecast API requests with special caching
+async function handleForecastRequest(request) {
+  try {
+    // Try to fetch from network first
+    const response = await fetch(request);
+    
+    if (response.ok) {
+      // Clone the response for caching
+      const responseToCache = response.clone();
+      
+      // Store in forecast cache with timestamp
+      const cache = await caches.open(FORECAST_CACHE_NAME);
+      await cache.put('forecast-last', responseToCache);
+      
+      // Also store timestamp
+      const timestamp = new Date().toISOString();
+      await cache.put('forecast-timestamp', new Response(timestamp));
+      
+      console.log('Service Worker: Cached forecast data', timestamp);
+      return response;
+    }
+    
+    throw new Error(`HTTP ${response.status}`);
+  } catch (error) {
+    console.log('Service Worker: Network failed, trying cache', error.message);
+    
+    // Network failed, try to serve from cache
+    const cache = await caches.open(FORECAST_CACHE_NAME);
+    const cachedResponse = await cache.match('forecast-last');
+    
+    if (cachedResponse) {
+      console.log('Service Worker: Serving cached forecast data');
+      return cachedResponse;
+    }
+    
+    // No cached data available
+    throw error;
+  }
+}
 
 // Handle background sync (if supported)
 self.addEventListener('sync', (event) => {

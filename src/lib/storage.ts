@@ -69,3 +69,68 @@ function pushUnique<T>(array: T[], item: T, maxLength: number): T[] {
   // Keep only the most recent items
   return updated.slice(0, maxLength);
 }
+
+// Forecast snapshot storage helpers
+export interface ForecastSnapshot {
+  data: any;
+  timestamp: string;
+  city: string;
+  units: string;
+}
+
+export function saveSnapshot(data: any, city: string, units: string): void {
+  try {
+    if (typeof window === 'undefined') return;
+    
+    const snapshot: ForecastSnapshot = {
+      data,
+      timestamp: new Date().toISOString(),
+      city,
+      units
+    };
+
+    setJSON('weatherflow:forecast-snapshot', snapshot);
+  } catch {
+    // Silently fail if localStorage is not available
+  }
+}
+
+export function getSnapshot(): ForecastSnapshot | null {
+  try {
+    if (typeof window === 'undefined') return null;
+    return getJSON<ForecastSnapshot>('weatherflow:forecast-snapshot');
+  } catch {
+    return null;
+  }
+}
+
+export function clearSnapshot(): void {
+  try {
+    if (typeof window === 'undefined') return;
+    removeKey('weatherflow:forecast-snapshot');
+  } catch {
+    // Silently fail if localStorage is not available
+  }
+}
+
+// Helper to check if snapshot is recent (less than 24 hours old)
+export function isSnapshotRecent(snapshot: ForecastSnapshot): boolean {
+  const snapshotTime = new Date(snapshot.timestamp).getTime();
+  const now = new Date().getTime();
+  const twentyFourHours = 24 * 60 * 60 * 1000;
+  
+  return (now - snapshotTime) < twentyFourHours;
+}
+
+// Helper to format snapshot timestamp for display
+export function formatSnapshotTime(timestamp: string): string {
+  const date = new Date(timestamp);
+  return date.toLocaleString('en-US', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  });
+}

@@ -64,4 +64,6 @@ export type DailyForecast = {
 export type Forecast = {
   timezone_offset: number;
   daily: DailyForecast[];
+  _cached?: boolean;
+  _cachedAt?: string;
 };
