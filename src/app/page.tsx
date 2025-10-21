@@ -122,22 +122,13 @@ export default function Home() {
   // Get forecast data from API - memoized to prevent unnecessary re-renders
   const forecasts = useMemo(() => forecastData?.daily || [], [forecastData?.daily]);
 
-  const handleSearch = useCallback((query: string) => {
-    if (!query.trim()) return;
-    
-    setSearchQuery(query);
+  const handleCitySelect = useCallback((city: GeoPoint) => {
+    setSelectedCity(city);
+    setSearchQuery(city.name || '');
     setLocationError(null);
-    
-    // Mock city selection for now (will be replaced with real geocoding)
-    const mockCity: GeoPoint = {
-      lat: 40.7128 + (Math.random() - 0.5) * 0.1,
-      lon: -74.0060 + (Math.random() - 0.5) * 0.1,
-      name: query,
-      country: 'US'
-    };
-    
-    setSelectedCity(mockCity);
-    addRecentSearch(query);
+    if (city.name) {
+      addRecentSearch(city.name);
+    }
   }, []);
 
   const handleUseLocation = async () => {
@@ -215,7 +206,7 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
             <h1 className="text-2xl font-bold text-cyan-300">WeatherFlow</h1>
             <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
-              <SearchBar onSearch={handleSearch} />
+              <SearchBar onCitySelect={handleCitySelect} />
               <UnitToggle onChange={handleUnitsChange} />
             </div>
           </div>

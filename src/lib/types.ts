@@ -7,6 +7,44 @@ export type GeoPoint = {
   country?: string; 
 };
 
+// Open-Meteo API Response Types
+export type OpenMeteoGeocodingResult = {
+  id: number;
+  name: string;
+  latitude: number;
+  longitude: number;
+  country: string;
+  admin1?: string; // state/province
+  admin2?: string; // county
+};
+
+export type OpenMeteoCurrentWeather = {
+  time: string;
+  temperature_2m: number;
+  relative_humidity_2m: number;
+  wind_speed_10m: number;
+  wind_direction_10m: number;
+  weathercode: number;
+};
+
+export type OpenMeteoDailyForecast = {
+  time: string[];
+  weathercode: number[];
+  temperature_2m_max: number[];
+  temperature_2m_min: number[];
+};
+
+export type OpenMeteoForecastResponse = {
+  latitude: number;
+  longitude: number;
+  timezone: string;
+  timezone_abbreviation: string;
+  utc_offset_seconds: number;
+  current: OpenMeteoCurrentWeather;
+  daily: OpenMeteoDailyForecast;
+};
+
+// UI Types (normalized for our components)
 export type CurrentWeather = {
   coord: { lat: number; lon: number };
   dt: number;                        // unix timestamp

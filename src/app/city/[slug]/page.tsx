@@ -128,7 +128,7 @@ export default function CityPage({ params }: CityPageProps) {
           {/* Search and Controls */}
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <div className="flex-1">
-              <SearchBar onSearch={() => {}} disabled />
+              <SearchBar onCitySelect={() => {}} disabled />
             </div>
             <UnitToggle onChange={handleUnitsChange} />
           </div>
