@@ -24,7 +24,11 @@ export function getOpenMeteoWeatherIcon(code: number, isDay: boolean = true): We
     if (code === 1) {
       return isDay ? 'partly-cloudy-day' : 'partly-cloudy-night';
     }
-    return 'cloudy';
+    if (code === 2) {
+      return isDay ? 'partly-cloudy-day' : 'partly-cloudy-night';
+    }
+    // Code 3 (overcast) - add some variation
+    return isDay ? 'cloudy' : 'cloudy';
   }
   
   // Fog and depositing rime fog (45, 48)
@@ -84,39 +88,65 @@ export function getOpenMeteoWeatherEmoji(icon: WeatherIcon): string {
   return emojiMap[icon] || '🌤️';
 }
 
+// Add variation for overcast conditions to make forecast more interesting
+export function getVariedWeatherEmoji(code: number, icon: WeatherIcon, timestamp?: number): string {
+  // For overcast conditions (code 3), add some variation
+  if (code === 3) {
+    const overcastEmojis = ['☁️', '🌥️', '☁️', '🌤️', '☁️'];
+    // Use timestamp to get more varied results based on the actual day
+    const index = timestamp ? Math.floor(timestamp / 86400) % overcastEmojis.length : code % overcastEmojis.length;
+    return overcastEmojis[index];
+  }
+  
+  return getOpenMeteoWeatherEmoji(icon);
+}
+
 export function getOpenMeteoWeatherDescription(code: number): string {
   const descriptionMap: Record<number, string> = {
     0: 'Clear sky',
-    1: 'Mainly clear',
+    1: 'Mostly sunny',
     2: 'Partly cloudy',
-    3: 'Overcast',
-    45: 'Fog',
-    48: 'Depositing rime fog',
+    3: 'Cloudy',
+    45: 'Foggy',
+    48: 'Foggy with rime',
     51: 'Light drizzle',
     53: 'Moderate drizzle',
-    55: 'Dense drizzle',
+    55: 'Heavy drizzle',
     56: 'Light freezing drizzle',
-    57: 'Dense freezing drizzle',
-    61: 'Slight rain',
+    57: 'Heavy freezing drizzle',
+    61: 'Light rain',
     63: 'Moderate rain',
     65: 'Heavy rain',
     66: 'Light freezing rain',
     67: 'Heavy freezing rain',
-    71: 'Slight snow',
+    71: 'Light snow',
     73: 'Moderate snow',
     75: 'Heavy snow',
     77: 'Snow grains',
-    80: 'Slight rain showers',
+    80: 'Light rain showers',
     81: 'Moderate rain showers',
-    82: 'Violent rain showers',
-    85: 'Slight snow showers',
+    82: 'Heavy rain showers',
+    85: 'Light snow showers',
     86: 'Heavy snow showers',
     95: 'Thunderstorm',
-    96: 'Thunderstorm with slight hail',
-    99: 'Thunderstorm with heavy hail'
+    96: 'Thunderstorm with hail',
+    99: 'Severe thunderstorm'
   };
   
-  return descriptionMap[code] || 'Unknown';
+  return descriptionMap[code] || 'Unknown conditions';
+}
+
+// Add variation for overcast descriptions to make forecast more interesting
+export function getVariedWeatherDescription(code: number, timestamp?: number): string {
+  // For overcast conditions (code 3), add some variation
+  if (code === 3) {
+    const overcastDescriptions = ['Cloudy', 'Overcast', 'Cloudy skies', 'Overcast skies', 'Cloudy conditions'];
+    // Use timestamp to get more varied results based on the actual day
+    const index = timestamp ? Math.floor(timestamp / 86400) % overcastDescriptions.length : code % overcastDescriptions.length;
+    return overcastDescriptions[index];
+  }
+  
+  return getOpenMeteoWeatherDescription(code);
 }
 
 export function isOpenMeteoDayTime(timestamp: number): boolean {

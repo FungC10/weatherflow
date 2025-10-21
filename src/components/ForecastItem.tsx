@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { Units, DailyForecast } from '@/lib/types';
 import { formatTemp } from '@/lib/format';
-import { getOpenMeteoWeatherIcon, getOpenMeteoWeatherEmoji, isOpenMeteoDayTime } from '@/lib/weatherIconOpenMeteo';
+import { getOpenMeteoWeatherIcon, getVariedWeatherEmoji, getVariedWeatherDescription, isOpenMeteoDayTime } from '@/lib/weatherIconOpenMeteo';
 
 interface ForecastItemProps {
   forecast: DailyForecast;
@@ -17,7 +17,7 @@ const ForecastItem = memo(function ForecastItem({ forecast, units, isToday = fal
   const weather = forecast.weather[0];
   const isDay = isOpenMeteoDayTime(forecast.dt);
   const weatherIcon = weather ? getOpenMeteoWeatherIcon(weather.id, isDay) : 'unknown';
-  const weatherEmoji = getOpenMeteoWeatherEmoji(weatherIcon);
+  const weatherEmoji = weather ? getVariedWeatherEmoji(weather.id, weatherIcon, forecast.dt) : '🌤️';
 
   return (
     <div className="bg-white/5 backdrop-blur-sm rounded-lg p-4 border border-slate-700/30 hover:bg-white/10 transition-all duration-200 hover:shadow-lg">
@@ -27,7 +27,7 @@ const ForecastItem = memo(function ForecastItem({ forecast, units, isToday = fal
           <div className="flex-1">
             <h4 className="font-semibold text-slate-200 text-base">{dayName}</h4>
             <p className="text-slate-400 text-sm capitalize">
-              {weather?.description || 'Unknown conditions'}
+              {weather ? getVariedWeatherDescription(weather.id, forecast.dt) : 'Unknown conditions'}
             </p>
           </div>
         </div>
