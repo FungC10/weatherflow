@@ -1,30 +1,56 @@
 # WeatherFlow
 
-A modern weather application built with Next.js 14, TypeScript, and Tailwind CSS. Get current weather conditions and 5-day forecasts for any city worldwide.
+A modern, feature-rich weather application built with Next.js 14, TypeScript, and Tailwind CSS. Get current weather conditions, detailed forecasts, and interactive maps for any city worldwide with a beautiful, accessible interface.
 
-## Features
+## ✨ Features
 
-- 🌤️ **Current Weather**: Real-time weather data with temperature, humidity, wind, and pressure
-- 📅 **5-Day Forecast**: Extended weather predictions with daily highs and lows
-- 🗺️ **Interactive Map**: Visualize weather data on an interactive map
-- 📍 **Geolocation**: Use your current location for instant weather updates
-- 🔍 **Search**: Find weather for any city worldwide
-- 📱 **Responsive**: Works perfectly on desktop and mobile devices
-- ♿ **Accessible**: Full keyboard navigation and screen reader support
-- 🎨 **Dark Theme**: Beautiful dark UI with cyan accents
+### 🌤️ **Weather Data**
+- **Current Weather**: Real-time temperature, humidity, wind speed, pressure, and conditions
+- **5-Day Forecast**: Extended weather predictions with daily highs, lows, and conditions
+- **Hourly Temperature Sparkline**: Desktop-only 24-hour temperature chart (Chart.js)
+- **Weather Icons**: Dynamic weather icons with day/night variations
+- **Unit Conversion**: Instant Celsius ↔ Fahrenheit conversion (no API calls)
 
-## Tech Stack
+### 🔍 **Search & Discovery**
+- **Smart Search**: Debounced city search with instant suggestions
+- **Recent Searches**: Quick access to previously searched cities
+- **Favorites System**: Pin up to 8 favorite cities for instant access
+- **Keyboard Navigation**: Full arrow key navigation and Enter to select
+- **Geolocation**: Use your current location with permission handling
+
+### 🗺️ **Interactive Features**
+- **Collapsible Map**: Interactive map with city markers and weather popups
+- **Deep Linking**: Shareable URLs with city coordinates and units
+- **Offline Support**: Cached weather data when offline
+- **PWA Ready**: Installable as a mobile app with service worker
+
+### 🎨 **User Experience**
+- **Dark Theme**: Beautiful dark UI with cyan accents and glassmorphism
+- **Responsive Design**: Perfect on desktop, tablet, and mobile
+- **Accessibility**: WCAG AA compliant with screen reader support
+- **Animations**: Smooth transitions with Framer Motion (respects reduced motion)
+- **Loading States**: Elegant loading animations and error handling
+
+### ⚡ **Performance**
+- **Instant Unit Toggle**: Client-side conversion (no API calls)
+- **Smart Caching**: TanStack Query with optimized stale times
+- **Code Splitting**: Dynamic imports for maps and charts
+- **Bundle Optimization**: 127kB main bundle with lazy loading
+
+## 🛠️ Tech Stack
 
 - **Framework**: Next.js 14 (App Router)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
 - **Data Fetching**: TanStack Query (React Query)
 - **Maps**: Leaflet + React-Leaflet
+- **Charts**: Chart.js (dynamic import)
 - **Animations**: Framer Motion
 - **Icons**: Heroicons
 - **Testing**: Vitest + React Testing Library
+- **PWA**: Service Worker + Manifest
 
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 
@@ -85,7 +111,7 @@ NEXT_PUBLIC_WEATHER_API_KEY=your_api_key_here
 6. **Open your browser**
    Navigate to [http://localhost:3000](http://localhost:3000)
 
-## Available Scripts
+## 📜 Available Scripts
 
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
@@ -95,9 +121,12 @@ NEXT_PUBLIC_WEATHER_API_KEY=your_api_key_here
 - `npm run test:watch` - Run tests in watch mode
 - `npm run test:coverage` - Run tests with coverage
 - `npm run test:ui` - Run tests with UI
+- `npm run test:components` - Run component tests
+- `npm run test:all` - Run all tests
 - `npm run ci` - Run lint, tests, and build
+- `npm run analyze` - Analyze bundle size
 
-## Testing
+## 🧪 Testing
 
 This project uses Vitest for testing with React Testing Library for component testing.
 
@@ -113,9 +142,22 @@ npm run test:coverage
 
 # Run tests with UI
 npm run test:ui
+
+# Run component tests
+npm run test:components
+
+# Run all tests
+npm run test:all
 ```
 
-## Deployment
+**Test Coverage:**
+- ✅ Unit tests for utility functions (format, weather icons, unit conversion)
+- ✅ Component tests for SearchBar, CurrentCard, ForecastList
+- ✅ Integration tests for API calls and data flow
+- ✅ Accessibility tests for screen reader support
+- ✅ Performance tests for memoization and caching
+
+## 🚀 Deployment
 
 ### Vercel (Recommended)
 
@@ -159,16 +201,18 @@ The app can be deployed to any platform that supports Next.js:
 - **DigitalOcean App Platform**: Deploy from GitHub
 - **AWS Amplify**: Connect repository and deploy
 
-## API Usage
+## 🔌 API Usage
 
 This app supports multiple weather providers:
 
 ### Open-Meteo (Default, Free)
 - **Geocoding**: `https://geocoding-api.open-meteo.com/v1/search`
 - **Weather**: `https://api.open-meteo.com/v1/forecast`
+- **Hourly Data**: `https://api.open-meteo.com/v1/forecast` (with hourly parameter)
 - No API key required
 - Free for unlimited use
 - High-quality weather data
+- WMO weather codes
 
 ### OpenWeatherMap (Optional, Premium)
 - **Current Weather**: `https://api.openweathermap.org/data/2.5/weather`
@@ -176,7 +220,75 @@ This app supports multiple weather providers:
 - Requires API key
 - Free tier: 1,000 calls per day
 
-## Contributing
+## 🎯 Key Features Deep Dive
+
+### Unit Conversion System
+- **Instant Conversion**: No API calls when toggling units
+- **Client-Side Math**: Accurate temperature and wind speed conversion
+- **Consistent Data**: Always fetch in metric, convert to display units
+- **Performance**: Zero network requests for unit changes
+
+### Favorites System
+- **Local Storage**: Persistent favorites across sessions
+- **Limit Management**: Maximum 8 favorites with automatic cleanup
+- **Cross-Tab Sync**: Favorites sync across browser tabs
+- **Keyboard Navigation**: Arrow keys + Enter to select favorites
+
+### Search Experience
+- **Debounced Search**: 300ms delay to prevent excessive API calls
+- **Smart Suggestions**: Recent searches + API results
+- **Keyboard First**: Full arrow key navigation
+- **Persistent UI**: Suggestions stay visible after Enter (2s delay)
+
+### Offline Support
+- **Service Worker**: Caches static assets and weather data
+- **Offline Indicator**: Shows when using cached data
+- **Graceful Degradation**: App works without network
+- **Data Persistence**: Last successful forecast cached locally
+
+### Accessibility Features
+- **WCAG AA Compliance**: Proper contrast ratios and focus management
+- **Screen Reader Support**: Comprehensive ARIA labels and descriptions
+- **Keyboard Navigation**: Full keyboard accessibility
+- **Reduced Motion**: Respects user motion preferences
+- **Focus Management**: Proper focus handling on route changes
+
+## 📱 PWA Features
+
+- **Installable**: Add to home screen on mobile devices
+- **Offline Ready**: Works without internet connection
+- **App-like Experience**: Full-screen mode and native feel
+- **Service Worker**: Background caching and updates
+- **Manifest**: Proper app metadata and icons
+
+## 🔧 Development
+
+### Project Structure
+```
+src/
+├── app/                 # Next.js App Router pages
+├── components/          # React components
+├── lib/                 # Utility functions and types
+│   ├── __tests__/      # Unit tests
+│   └── ...
+└── styles/             # Global CSS
+```
+
+### Key Components
+- **SearchBar**: Smart search with suggestions and keyboard navigation
+- **CurrentCard**: Weather display with favorites and hourly chart
+- **ForecastList**: 5-day forecast with animations
+- **MapPanel**: Interactive map with weather markers
+- **FavoritesBar**: Horizontal scrollable favorites list
+
+### Performance Optimizations
+- **React.memo**: Prevents unnecessary re-renders
+- **useCallback/useMemo**: Memoized functions and values
+- **Dynamic Imports**: Lazy loading for maps and charts
+- **Query Optimization**: Smart caching and stale time management
+- **Bundle Splitting**: Separate chunks for different features
+
+## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/amazing-feature`
@@ -184,14 +296,25 @@ This app supports multiple weather providers:
 4. Push to the branch: `git push origin feature/amazing-feature`
 5. Open a Pull Request
 
-## License
+### Development Guidelines
+- Follow TypeScript best practices
+- Write tests for new features
+- Ensure accessibility compliance
+- Maintain performance standards
+- Update documentation
+
+## 📄 License
 
 This project is licensed under the ISC License.
 
-## Acknowledgments
+## 🙏 Acknowledgments
 
-- [OpenWeatherMap](https://openweathermap.org/) for weather data
+- [Open-Meteo](https://open-meteo.com/) for free weather data
+- [OpenWeatherMap](https://openweathermap.org/) for premium weather data
 - [OpenStreetMap](https://www.openstreetmap.org/) for map tiles
 - [Next.js](https://nextjs.org/) for the amazing framework
 - [Tailwind CSS](https://tailwindcss.com/) for styling
 - [TanStack Query](https://tanstack.com/query) for data fetching
+- [Chart.js](https://www.chartjs.org/) for data visualization
+- [Leaflet](https://leafletjs.com/) for interactive maps
+- [Framer Motion](https://www.framer.com/motion/) for animations
