@@ -8,7 +8,7 @@ import CurrentCard from '@/components/CurrentCard';
 import EmptyState from '@/components/EmptyState';
 import ErrorState from '@/components/ErrorState';
 import LoadingShimmer from '@/components/LoadingShimmer';
-import { Units, GeoPoint } from '@/lib/types';
+import { Units, GeoPoint, CurrentWeather, Forecast } from '@/lib/types';
 import { getCurrent, getForecast } from '@/lib/api';
 import { queryKeys } from '@/lib/queryKeys';
 import { askLocation, getLocationErrorMessage, GeoLocationError } from '@/lib/geo';
@@ -18,6 +18,7 @@ import ShareButton from '@/components/ShareButton';
 import OfflineIndicator from '@/components/OfflineIndicator';
 import FavoritesBar from '@/components/FavoritesBar';
 import { useStrings } from '@/lib/LocaleContext';
+import { convertCurrentWeather, convertForecast } from '@/lib/unitConversion';
 import dynamic from 'next/dynamic';
 
 // Lazy-load MapPanel to protect initial bundle
@@ -69,6 +70,9 @@ export default function Home() {
   const [locationError, setLocationError] = useState<string | null>(null);
   const [isRequestingLocation, setIsRequestingLocation] = useState(false);
   const [showMap, setShowMap] = useState(false);
+  const [originalCurrentWeather, setOriginalCurrentWeather] = useState<CurrentWeather | null>(null);
+  const [originalForecast, setOriginalForecast] = useState<Forecast | null>(null);
+  const [originalUnits, setOriginalUnits] = useState<Units>('metric');
   const queryClient = useQueryClient();
 
   // Fetch current weather when city is selected
@@ -123,13 +127,43 @@ export default function Home() {
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   });
 
+  // Store original data when it's first fetched
+  useEffect(() => {
+    if (currentWeather && !originalCurrentWeather) {
+      setOriginalCurrentWeather(currentWeather);
+      setOriginalUnits(units);
+    }
+  }, [currentWeather, originalCurrentWeather, units]);
+
+  useEffect(() => {
+    if (forecastData && !originalForecast) {
+      setOriginalForecast(forecastData);
+    }
+  }, [forecastData, originalForecast]);
+
+  // Convert data based on current units
+  const convertedCurrentWeather = useMemo(() => {
+    if (!originalCurrentWeather) return currentWeather;
+    if (units === originalUnits) return originalCurrentWeather;
+    return convertCurrentWeather(originalCurrentWeather, originalUnits, units);
+  }, [originalCurrentWeather, originalUnits, units, currentWeather]);
+
+  const convertedForecastData = useMemo(() => {
+    if (!originalForecast) return forecastData;
+    if (units === originalUnits) return originalForecast;
+    return convertForecast(originalForecast, originalUnits, units);
+  }, [originalForecast, originalUnits, units, forecastData]);
+
   // Get forecast data from API - memoized to prevent unnecessary re-renders
-  const forecasts = useMemo(() => forecastData?.daily || [], [forecastData?.daily]);
+  const forecasts = useMemo(() => convertedForecastData?.daily || [], [convertedForecastData?.daily]);
 
   const handleCitySelect = useCallback((city: GeoPoint) => {
     setSelectedCity(city);
     setSearchQuery(city.name || '');
     setLocationError(null);
+    // Reset original data when selecting a new city
+    setOriginalCurrentWeather(null);
+    setOriginalForecast(null);
     if (city.name) {
       addRecentSearch(city.name);
     }
@@ -161,16 +195,8 @@ export default function Home() {
 
   const handleUnitsChange = useCallback((newUnits: Units) => {
     setUnits(newUnits);
-    // Invalidate both current weather and forecast queries to refetch with new units
-    if (selectedCity) {
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.current(selectedCity.lat, selectedCity.lon, units)
-      });
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.forecast(selectedCity.lat, selectedCity.lon, units)
-      });
-    }
-  }, [selectedCity, units, queryClient]);
+    // No need to refetch - we'll convert the existing data client-side
+  }, []);
 
   const handleRetry = useCallback(() => {
     if (selectedCity) {
@@ -328,10 +354,10 @@ export default function Home() {
               </div>
               
               <CurrentCard 
-                weather={currentWeather}
+                weather={convertedCurrentWeather || undefined}
                 location={selectedCity}
                 units={units}
-                hourlyData={forecastData?.hourly}
+                hourlyData={convertedForecastData?.hourly}
               />
               
               {/* Map Toggle and Panel */}
@@ -351,7 +377,7 @@ export default function Home() {
                 {showMap && (
                   <MapPanel
                     city={selectedCity}
-                    currentWeather={currentWeather}
+                    currentWeather={convertedCurrentWeather || null}
                     units={units}
                     isVisible={showMap}
                   />
