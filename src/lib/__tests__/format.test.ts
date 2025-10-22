@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { formatTemp, formatWind, formatPressure, formatDate, getWindDirection } from '../format'
+import { formatTemp, formatWind, formatPressure, formatDate, formatTime, localTime, getWindDirection } from '../format'
 
 describe('format utilities', () => {
   describe('formatTemp', () => {
@@ -37,6 +37,50 @@ describe('format utilities', () => {
     it('formats pressure in imperial units', () => {
       expect(formatPressure(29.92, 'imperial')).toBe('29.92 inHg')
       expect(formatPressure(0, 'imperial')).toBe('0 inHg')
+    })
+  })
+
+  describe('localTime', () => {
+    it('converts timestamp to local time with timezone offset', () => {
+      const timestamp = 1640995200 // 2021-12-31 00:00:00 UTC
+      const timezone = 0 // UTC
+      const result = localTime(timestamp, timezone)
+      expect(result).toBeInstanceOf(Date)
+      expect(result.getTime()).toBe(timestamp * 1000)
+    })
+
+    it('handles positive timezone offset', () => {
+      const timestamp = 1640995200 // 2021-12-31 00:00:00 UTC
+      const timezone = 3600 // UTC+1
+      const result = localTime(timestamp, timezone)
+      expect(result).toBeInstanceOf(Date)
+      // Should be 1 hour ahead
+      expect(result.getTime()).toBe((timestamp + 3600) * 1000)
+    })
+
+    it('handles negative timezone offset', () => {
+      const timestamp = 1640995200 // 2021-12-31 00:00:00 UTC
+      const timezone = -3600 // UTC-1
+      const result = localTime(timestamp, timezone)
+      expect(result).toBeInstanceOf(Date)
+      // Should be 1 hour behind
+      expect(result.getTime()).toBe((timestamp - 3600) * 1000)
+    })
+  })
+
+  describe('formatTime', () => {
+    it('formats time with timezone offset', () => {
+      const timestamp = 1640995200 // 2021-12-31 00:00:00 UTC
+      const timezone = 0 // UTC
+      const result = formatTime(timestamp, timezone)
+      expect(result).toMatch(/^\d{1,2}:\d{2} (AM|PM)$/)
+    })
+
+    it('handles different timezone offsets', () => {
+      const timestamp = 1640995200 // 2021-12-31 00:00:00 UTC
+      const timezone = 3600 // UTC+1
+      const result = formatTime(timestamp, timezone)
+      expect(result).toMatch(/^\d{1,2}:\d{2} (AM|PM)$/)
     })
   })
 
