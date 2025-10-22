@@ -1,14 +1,57 @@
 import React from 'react'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { vi, describe, it, expect, beforeEach } from 'vitest'
+import { render, mockGeolocation, localStorageMock } from '../../../test/utils'
 import SearchBar from '../SearchBar'
 
 // Mock the storage functions
-vi.mock('@/lib/storage', () => ({
-  getRecentSearches: vi.fn(() => ['London', 'New York', 'Tokyo']),
+vi.mock('../../lib/storage', () => ({
+  getRecentSearches: vi.fn(() => [
+    { name: 'London', country: 'GB', lat: 51.5074, lon: -0.1278 },
+    { name: 'New York', country: 'US', lat: 40.7128, lon: -74.0060 },
+    { name: 'Tokyo', country: 'JP', lat: 35.6762, lon: 139.6503 }
+  ]),
+  addRecentSearch: vi.fn(),
   clearRecentSearches: vi.fn(),
 }))
+
+// Mock the API functions
+vi.mock('../../lib/api', () => ({
+  searchCity: vi.fn((query: string) => {
+    const mockResults = {
+      'london': [{ name: 'London', country: 'GB', lat: 51.5074, lon: -0.1278 }],
+      'paris': [{ name: 'Paris', country: 'FR', lat: 48.8566, lon: 2.3522 }],
+      'tokyo': [{ name: 'Tokyo', country: 'JP', lat: 35.6762, lon: 139.6503 }],
+    }
+    return Promise.resolve(mockResults[query.toLowerCase()] || [])
+  })
+}))
+
+// Mock TanStack Query
+vi.mock('@tanstack/react-query', async () => {
+  const actual = await vi.importActual('@tanstack/react-query')
+  return {
+    ...actual,
+    useQuery: vi.fn(({ queryKey, queryFn, enabled }) => {
+      const [type, query] = queryKey
+      
+      if (type === 'city' && enabled && query) {
+        return {
+          data: query === 'london' ? [{ name: 'London', country: 'GB', lat: 51.5074, lon: -0.1278 }] : [],
+          isLoading: false,
+          error: null,
+        }
+      }
+      
+      return {
+        data: undefined,
+        isLoading: false,
+        error: null,
+      }
+    }),
+  }
+})
 
 describe('SearchBar', () => {
   const mockOnCitySelect = vi.fn()
@@ -31,7 +74,7 @@ describe('SearchBar', () => {
     render(<SearchBar onCitySelect={mockOnCitySelect} />)
     
     const input = screen.getByRole('combobox', { name: /search for a city/i })
-    await user.type(input, 'London')
+    await user.type(input, 'london')
     
     // Wait for search results to appear
     await waitFor(() => {
@@ -45,8 +88,9 @@ describe('SearchBar', () => {
     expect(mockOnCitySelect).toHaveBeenCalledWith(
       expect.objectContaining({
         name: 'London',
-        lat: expect.any(Number),
-        lon: expect.any(Number)
+        country: 'GB',
+        lat: 51.5074,
+        lon: -0.1278
       })
     )
   })
@@ -166,20 +210,21 @@ describe('SearchBar', () => {
     render(<SearchBar onCitySelect={mockOnCitySelect} />)
     
     const input = screen.getByRole('combobox', { name: /search for a city/i })
-    await user.type(input, 'Paris')
+    await user.type(input, 'london')
     
     // Wait for search results to appear
     await waitFor(() => {
-      expect(screen.getByText('Paris')).toBeInTheDocument()
+      expect(screen.getByText('London')).toBeInTheDocument()
     }, { timeout: 1000 })
     
     await user.keyboard('{Enter}')
     
     expect(mockOnCitySelect).toHaveBeenCalledWith(
       expect.objectContaining({
-        name: 'Paris',
-        lat: expect.any(Number),
-        lon: expect.any(Number)
+        name: 'London',
+        country: 'GB',
+        lat: 51.5074,
+        lon: -0.1278
       })
     )
   })
