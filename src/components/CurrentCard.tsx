@@ -3,6 +3,7 @@ import { GeoPoint, Units, CurrentWeather, HourlyData } from '@/lib/types';
 import { formatTemp, formatWind, formatPressure, formatDate, getWindDirection } from '@/lib/format';
 import { useStrings } from '@/lib/LocaleContext';
 import dynamic from 'next/dynamic';
+import FavoriteButton from './FavoriteButton';
 
 // Dynamic import for HourlySparkline to avoid loading Chart.js on mobile
 const HourlySparkline = dynamic(() => import('./HourlySparkline'), {
@@ -64,8 +65,16 @@ const CurrentCard = memo(function CurrentCard({ weather, location, units, isLoad
   return (
     <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50" role="region" aria-labelledby="current-weather-title">
       <div className="flex items-center justify-between mb-4">
-        <div>
-          <h2 id="current-weather-title" className="text-2xl font-bold text-slate-100">{weather.name}</h2>
+        <div className="flex-1">
+          <div className="flex items-center space-x-3">
+            <h2 id="current-weather-title" className="text-2xl font-bold text-slate-100">{weather.name}</h2>
+            {location && (
+              <FavoriteButton 
+                city={location} 
+                className="flex-shrink-0"
+              />
+            )}
+          </div>
           <p className="text-slate-400 text-sm" aria-label={`${strings.lastUpdated} ${formatDate(weather.dt, weather.timezone)}`}>
             {formatDate(weather.dt, weather.timezone)}
           </p>

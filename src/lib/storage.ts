@@ -134,3 +134,98 @@ export function formatSnapshotTime(timestamp: string): string {
     hour12: false
   });
 }
+
+// Favorites functionality
+export interface FavoriteCity {
+  name: string;
+  country: string;
+  lat: number;
+  lon: number;
+  addedAt: string;
+}
+
+const FAVORITES_KEY = 'weatherflow:favorites';
+const MAX_FAVORITES = 8;
+
+export function getFavorites(): FavoriteCity[] {
+  try {
+    if (typeof window === 'undefined') return [];
+    return getJSON(FAVORITES_KEY) || [];
+  } catch {
+    return [];
+  }
+}
+
+export function addFavorite(city: { name: string; country: string; lat: number; lon: number }): boolean {
+  try {
+    if (typeof window === 'undefined') return false;
+    
+    const favorites = getFavorites();
+    
+    // Check if already exists
+    const exists = favorites.some(fav => 
+      fav.name === city.name && 
+      fav.country === city.country &&
+      Math.abs(fav.lat - city.lat) < 0.001 &&
+      Math.abs(fav.lon - city.lon) < 0.001
+    );
+    
+    if (exists) return false;
+    
+    // Add new favorite
+    const newFavorite: FavoriteCity = {
+      ...city,
+      addedAt: new Date().toISOString()
+    };
+    
+    const updatedFavorites = [newFavorite, ...favorites].slice(0, MAX_FAVORITES);
+    setJSON(FAVORITES_KEY, updatedFavorites);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function removeFavorite(city: { name: string; country: string; lat: number; lon: number }): boolean {
+  try {
+    if (typeof window === 'undefined') return false;
+    
+    const favorites = getFavorites();
+    const updatedFavorites = favorites.filter(fav => 
+      !(fav.name === city.name && 
+        fav.country === city.country &&
+        Math.abs(fav.lat - city.lat) < 0.001 &&
+        Math.abs(fav.lon - city.lon) < 0.001)
+    );
+    
+    setJSON(FAVORITES_KEY, updatedFavorites);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function isFavorite(city: { name: string; country: string; lat: number; lon: number }): boolean {
+  try {
+    if (typeof window === 'undefined') return false;
+    
+    const favorites = getFavorites();
+    return favorites.some(fav => 
+      fav.name === city.name && 
+      fav.country === city.country &&
+      Math.abs(fav.lat - city.lat) < 0.001 &&
+      Math.abs(fav.lon - city.lon) < 0.001
+    );
+  } catch {
+    return false;
+  }
+}
+
+export function clearFavorites(): void {
+  try {
+    if (typeof window === 'undefined') return;
+    removeKey(FAVORITES_KEY);
+  } catch {
+    // Silently fail
+  }
+}

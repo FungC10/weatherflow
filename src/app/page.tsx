@@ -16,6 +16,7 @@ import { addRecentSearch } from '@/lib/storage';
 import { generateCityUrl } from '@/lib/cityUtils';
 import ShareButton from '@/components/ShareButton';
 import OfflineIndicator from '@/components/OfflineIndicator';
+import FavoritesBar from '@/components/FavoritesBar';
 import { useStrings } from '@/lib/LocaleContext';
 import dynamic from 'next/dynamic';
 
@@ -250,6 +251,13 @@ export default function Home() {
           </div>
         </div>
       </header>
+
+      {/* Favorites Bar */}
+      <div className="container mx-auto px-4 py-4">
+        <div className="max-w-4xl mx-auto">
+          <FavoritesBar onCitySelect={handleCitySelect} />
+        </div>
+      </div>
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">

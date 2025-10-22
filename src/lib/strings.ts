@@ -76,6 +76,15 @@ export interface Strings {
   offlineData: string;
   lastUpdatedAt: string;
   
+  // Favorites
+  addToFavorites: string;
+  removeFromFavorites: string;
+  favorites: string;
+  noFavorites: string;
+  addFavoritesMessage: string;
+  favoriteAdded: string;
+  favoriteRemoved: string;
+  
   // Empty state
   welcomeTitle: string;
   welcomeMessage: string;
@@ -198,6 +207,15 @@ const strings: Record<Locale, Strings> = {
     // Offline
     offlineData: 'Offline data',
     lastUpdatedAt: 'last updated at',
+    
+    // Favorites
+    addToFavorites: 'Add to favorites',
+    removeFromFavorites: 'Remove from favorites',
+    favorites: 'Favorites',
+    noFavorites: 'No favorites yet',
+    addFavoritesMessage: 'Add cities to your favorites for quick access',
+    favoriteAdded: 'Added to favorites',
+    favoriteRemoved: 'Removed from favorites',
     
     // Empty state
     welcomeTitle: 'Welcome to WeatherFlow',
