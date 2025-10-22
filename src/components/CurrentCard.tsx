@@ -1,16 +1,29 @@
 import { memo } from 'react';
-import { GeoPoint, Units, CurrentWeather } from '@/lib/types';
+import { GeoPoint, Units, CurrentWeather, HourlyData } from '@/lib/types';
 import { formatTemp, formatWind, formatPressure, formatDate, getWindDirection } from '@/lib/format';
 import { useStrings } from '@/lib/LocaleContext';
+import dynamic from 'next/dynamic';
+
+// Dynamic import for HourlySparkline to avoid loading Chart.js on mobile
+const HourlySparkline = dynamic(() => import('./HourlySparkline'), {
+  ssr: false,
+  loading: () => (
+    <div className="animate-pulse">
+      <div className="h-4 bg-slate-700/30 rounded w-32 mb-2"></div>
+      <div className="h-16 bg-slate-700/30 rounded-lg"></div>
+    </div>
+  )
+});
 
 interface CurrentCardProps {
   weather?: CurrentWeather;
   location?: GeoPoint;
   units: Units;
   isLoading?: boolean;
+  hourlyData?: HourlyData[];
 }
 
-const CurrentCard = memo(function CurrentCard({ weather, location, units, isLoading = false }: CurrentCardProps) {
+const CurrentCard = memo(function CurrentCard({ weather, location, units, isLoading = false, hourlyData }: CurrentCardProps) {
   const strings = useStrings();
   if (isLoading) {
     return (
@@ -93,6 +106,17 @@ const CurrentCard = memo(function CurrentCard({ weather, location, units, isLoad
           </span>
         </div>
       </div>
+
+      {/* Hourly Temperature Sparkline - Desktop Only */}
+      {hourlyData && hourlyData.length > 0 && (
+        <div className="mt-6 hidden md:block">
+          <HourlySparkline 
+            hourlyData={hourlyData} 
+            units={units}
+            className="w-full"
+          />
+        </div>
+      )}
     </div>
   );
 });

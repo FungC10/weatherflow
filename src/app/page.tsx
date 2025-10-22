@@ -26,7 +26,7 @@ const MapPanel = dynamic(() => import('@/components/MapPanel'), {
     <div className="w-full h-64 bg-slate-800/50 rounded-lg border border-slate-700/30 flex items-center justify-center">
       <div className="text-center">
         <div className="animate-spin rounded-full h-8 w-8 border-2 border-cyan-400 border-t-transparent mx-auto mb-2"></div>
-        <p className="text-slate-400 text-sm">{strings.loadingMap}</p>
+        <p className="text-slate-400 text-sm">Loading map...</p>
       </div>
     </div>
   )
@@ -323,6 +323,7 @@ export default function Home() {
                 weather={currentWeather}
                 location={selectedCity}
                 units={units}
+                hourlyData={forecastData?.hourly}
               />
               
               {/* Map Toggle and Panel */}

@@ -40,6 +40,7 @@ export interface Strings {
   today: string;
   high: string;
   low: string;
+  hourlyTemperature: string;
   
   // States
   noWeatherData: string;
@@ -162,6 +163,7 @@ const strings: Record<Locale, Strings> = {
     today: 'Today',
     high: 'High',
     low: 'Low',
+    hourlyTemperature: '24-Hour Temperature',
     
     // States
     noWeatherData: 'No Weather Data',

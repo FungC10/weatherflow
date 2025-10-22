@@ -52,8 +52,8 @@ export default function ShareButton({ city, units, className = '' }: ShareButton
     <button
       onClick={handleShare}
       className={`flex items-center space-x-2 px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-900 ${className}`}
-      aria-label={copied ? strings.linkCopiedToClipboard : strings.shareWeatherForCity.replace('{city}', city.name)}
-      title={copied ? strings.linkCopiedToClipboard : strings.shareWeatherForCity.replace('{city}', city.name)}
+      aria-label={copied ? strings.linkCopiedToClipboard : strings.shareWeatherForCity?.replace('{city}', city.name || 'Unknown City') || `Share weather for ${city.name || 'Unknown City'}`}
+      title={copied ? strings.linkCopiedToClipboard : strings.shareWeatherForCity?.replace('{city}', city.name || 'Unknown City') || `Share weather for ${city.name || 'Unknown City'}`}
     >
       {copied ? (
         <>

@@ -42,6 +42,10 @@ export type OpenMeteoForecastResponse = {
   utc_offset_seconds: number;
   current: OpenMeteoCurrentWeather;
   daily: OpenMeteoDailyForecast;
+  hourly?: {
+    time: string[];
+    temperature_2m: number[];
+  };
 };
 
 // UI Types (normalized for our components)
@@ -61,9 +65,15 @@ export type DailyForecast = {
   weather: { id: number; main: string; description: string; icon: string }[];
 };
 
+export type HourlyData = {
+  time: string;
+  temperature: number;
+};
+
 export type Forecast = {
   timezone_offset: number;
   daily: DailyForecast[];
+  hourly?: HourlyData[];
   _cached?: boolean;
   _cachedAt?: string;
 };

@@ -129,7 +129,7 @@ async function getCurrentOpenWeather(lat: number, lon: number, units: Units): Pr
 export async function getForecast(lat: number, lon: number, units: Units): Promise<Forecast> {
   if (PROVIDER === 'open-meteo') {
     // free route – no key
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&temperature_unit=${units === 'metric' ? 'celsius' : 'fahrenheit'}&wind_speed_unit=${units === 'metric' ? 'kmh' : 'mph'}`;
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m&daily=weathercode,temperature_2m_max,temperature_2m_min&hourly=temperature_2m&timezone=auto&temperature_unit=${units === 'metric' ? 'celsius' : 'fahrenheit'}&wind_speed_unit=${units === 'metric' ? 'kmh' : 'mph'}`;
     
     try {
       const response = await fetch(url);
@@ -162,9 +162,16 @@ export async function getForecast(lat: number, lon: number, units: Units): Promi
         };
       });
       
+      // Process hourly data if available
+      const hourlyData = data.hourly ? data.hourly.time.map((time, index) => ({
+        time,
+        temperature: data.hourly!.temperature_2m[index]
+      })) : undefined;
+
       const forecast: Forecast = {
         timezone_offset: data.utc_offset_seconds,
-        daily: dailyForecasts
+        daily: dailyForecasts,
+        hourly: hourlyData
       };
       
       // Save successful forecast as snapshot
