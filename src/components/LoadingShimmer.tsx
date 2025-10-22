@@ -1,3 +1,5 @@
+import { useStrings } from '@/lib/LocaleContext';
+
 interface LoadingShimmerProps {
   type?: 'card' | 'list' | 'full';
   message?: string;
@@ -5,11 +7,13 @@ interface LoadingShimmerProps {
 
 export default function LoadingShimmer({ 
   type = 'card', 
-  message = "Loading weather data..." 
+  message
 }: LoadingShimmerProps) {
+  const strings = useStrings();
+  const actualMessage = message || strings.loadingWeather;
   if (type === 'full') {
     return (
-      <div className="space-y-6" role="status" aria-live="polite" aria-label={message}>
+      <div className="space-y-6" role="status" aria-live="polite" aria-label={actualMessage}>
         {/* Current weather card skeleton */}
         <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50 shadow-lg">
           <div className="animate-pulse">
@@ -54,14 +58,14 @@ export default function LoadingShimmer({
             </div>
           ))}
         </div>
-        <div className="sr-only">{message}</div>
+        <div className="sr-only">{actualMessage}</div>
       </div>
     );
   }
 
   if (type === 'list') {
     return (
-      <div className="space-y-2" role="status" aria-live="polite" aria-label={message}>
+      <div className="space-y-2" role="status" aria-live="polite" aria-label={actualMessage}>
         {Array.from({ length: 5 }).map((_, i) => (
           <div key={i} className="bg-white/5 backdrop-blur-sm rounded-lg p-4 border border-slate-700/30 shadow-sm">
             <div className="animate-pulse">
@@ -78,14 +82,14 @@ export default function LoadingShimmer({
             </div>
           </div>
         ))}
-        <div className="sr-only">{message}</div>
+        <div className="sr-only">{actualMessage}</div>
       </div>
     );
   }
 
   // Default card type
   return (
-    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50 shadow-lg" role="status" aria-live="polite" aria-label={message}>
+    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50 shadow-lg" role="status" aria-live="polite" aria-label={actualMessage}>
       <div className="animate-pulse">
         <div className="h-6 bg-slate-700/60 rounded w-1/3 mb-4"></div>
         <div className="h-12 bg-slate-700/60 rounded w-1/2 mb-4"></div>

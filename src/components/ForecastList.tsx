@@ -2,6 +2,7 @@ import { memo, useMemo } from 'react';
 import { Units, DailyForecast } from '@/lib/types';
 import ForecastItem from './ForecastItem';
 import { motion } from 'framer-motion';
+import { useStrings } from '@/lib/LocaleContext';
 
 interface ForecastListProps {
   forecasts?: DailyForecast[];
@@ -10,10 +11,11 @@ interface ForecastListProps {
 }
 
 const ForecastList = memo(function ForecastList({ forecasts, units, isLoading = false }: ForecastListProps) {
+  const strings = useStrings();
   // Memoize the loading skeleton to prevent re-creation
   const loadingSkeleton = useMemo(() => (
     <div className="space-y-3">
-      <h3 className="text-lg font-semibold text-slate-200 mb-4">5-Day Forecast</h3>
+      <h3 className="text-lg font-semibold text-slate-200 mb-4">{strings.forecastTitle}</h3>
       {Array.from({ length: 5 }).map((_, index) => (
         <div key={index} className="bg-white/5 backdrop-blur-sm rounded-lg p-4 border border-slate-700/30">
           <div className="animate-pulse">
@@ -37,9 +39,9 @@ const ForecastList = memo(function ForecastList({ forecasts, units, isLoading = 
   const emptyState = useMemo(() => (
     <div className="text-center py-8">
       <div className="text-slate-400 mb-2">📅</div>
-      <h3 className="text-lg font-semibold text-slate-200 mb-2">No Forecast Data</h3>
+      <h3 className="text-lg font-semibold text-slate-200 mb-2">{strings.noForecastData}</h3>
       <p className="text-slate-400 text-sm">
-        Search for a city to see the 5-day forecast
+        {strings.noForecastDescription}
       </p>
     </div>
   ), []);
@@ -71,12 +73,12 @@ const ForecastList = memo(function ForecastList({ forecasts, units, isLoading = 
 
   return (
     <div className="space-y-3">
-      <h3 id="forecast-heading" className="text-lg font-semibold text-slate-200 mb-4">5-Day Forecast</h3>
+      <h3 id="forecast-heading" className="text-lg font-semibold text-slate-200 mb-4">{strings.forecastTitle}</h3>
       <motion.div 
         className="space-y-2"
         role="list"
         aria-labelledby="forecast-heading"
-        aria-label="5-day weather forecast"
+        aria-label={strings.forecastList}
         {...containerVariants}
       >
         {forecasts.slice(0, 5).map((forecast, index) => (

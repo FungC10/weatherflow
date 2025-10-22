@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { QueryProvider } from '@/lib/queryClient';
+import { LocaleProvider } from '@/lib/LocaleContext';
 import ServiceWorkerProvider from '@/components/ServiceWorkerProvider';
 import '@/styles/globals.css';
 
@@ -38,12 +39,14 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <QueryProvider>
-          <ServiceWorkerProvider />
-          <div className="min-h-screen bg-slate-900 text-slate-100">
-            <div className="container mx-auto px-4 py-8">
-              {children}
+          <LocaleProvider>
+            <ServiceWorkerProvider />
+            <div className="min-h-screen bg-slate-900 text-slate-100">
+              <div className="container mx-auto px-4 py-8">
+                {children}
+              </div>
             </div>
-          </div>
+          </LocaleProvider>
         </QueryProvider>
       </body>
     </html>

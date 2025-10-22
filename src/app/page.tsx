@@ -16,6 +16,7 @@ import { addRecentSearch } from '@/lib/storage';
 import { generateCityUrl } from '@/lib/cityUtils';
 import ShareButton from '@/components/ShareButton';
 import OfflineIndicator from '@/components/OfflineIndicator';
+import { useStrings } from '@/lib/LocaleContext';
 import dynamic from 'next/dynamic';
 
 // Lazy-load MapPanel to protect initial bundle
@@ -25,7 +26,7 @@ const MapPanel = dynamic(() => import('@/components/MapPanel'), {
     <div className="w-full h-64 bg-slate-800/50 rounded-lg border border-slate-700/30 flex items-center justify-center">
       <div className="text-center">
         <div className="animate-spin rounded-full h-8 w-8 border-2 border-cyan-400 border-t-transparent mx-auto mb-2"></div>
-        <p className="text-slate-400 text-sm">Loading map...</p>
+        <p className="text-slate-400 text-sm">{strings.loadingMap}</p>
       </div>
     </div>
   )
@@ -60,6 +61,7 @@ const ForecastList = dynamic(() => import('@/components/ForecastList'), {
 type AppState = 'empty' | 'loading' | 'error' | 'success';
 
 export default function Home() {
+  const strings = useStrings();
   const [selectedCity, setSelectedCity] = useState<GeoPoint | null>(null);
   const [units, setUnits] = useState<Units>('metric');
   const [searchQuery, setSearchQuery] = useState('');
@@ -231,7 +233,7 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
-                  <span>Use my location</span>
+                  <span>{strings.useMyLocation}</span>
                 </>
               )}
             </button>
@@ -256,7 +258,7 @@ export default function Home() {
           {!selectedCity && (
             <EmptyState 
               action={{
-                label: "Search for a city",
+                label: strings.searchForCity,
                 onClick: () => {
                   if (typeof window !== 'undefined') {
                     document.querySelector('input')?.focus();
@@ -270,18 +272,18 @@ export default function Home() {
           {selectedCity && (isLoadingWeather || isLoadingForecast) && (
             <LoadingShimmer 
               type="full" 
-              message={`Loading weather data for ${selectedCity.name}...`}
+              message={strings.loadingWeather}
             />
           )}
 
           {/* Error State - only show when city is selected and there's an error */}
           {selectedCity && (weatherError || forecastError) && !isLoadingWeather && !isLoadingForecast && (
             <ErrorState 
-              title="Failed to load weather data"
+              title={strings.errorTitle}
               message={
                 weatherError instanceof Error ? weatherError.message :
                 forecastError instanceof Error ? forecastError.message :
-                'Something went wrong'
+                strings.errorMessage
               }
               onRetry={handleRetry}
               autoFocus={true}
@@ -305,14 +307,14 @@ export default function Home() {
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                     </svg>
-                    <span>View Page</span>
+                    <span>{strings.viewPage}</span>
                   </button>
                   <button
                     onClick={handleClearSearch}
                     className="text-slate-400 hover:text-slate-300 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-900 rounded px-2 py-1"
-                    aria-label="Clear search and return to home"
+                    aria-label={strings.clearSearchAndReturn}
                   >
-                    Clear search
+                    {strings.clearSearch}
                   </button>
                 </div>
               </div>
@@ -328,13 +330,13 @@ export default function Home() {
                 <button
                   onClick={() => setShowMap(!showMap)}
                   className="flex items-center space-x-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-900 hover:shadow-lg hover:scale-105 active:scale-95"
-                  aria-label={showMap ? 'Hide map view' : 'Show map view'}
+                  aria-label={showMap ? strings.hideMapView : strings.showMapView}
                   aria-expanded={showMap}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                   </svg>
-                  <span>{showMap ? 'Hide map' : 'Show map'}</span>
+                  <span>{showMap ? strings.hideMap : strings.showMap}</span>
                 </button>
                 
                 {showMap && (

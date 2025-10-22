@@ -7,6 +7,7 @@ import { getRecentSearches, clearRecentSearches, addRecentSearch } from '@/lib/s
 import { searchCity } from '@/lib/api';
 import { queryKeys } from '@/lib/queryKeys';
 import { GeoPoint } from '@/lib/types';
+import { useStrings } from '@/lib/LocaleContext';
 
 interface SearchBarProps {
   onCitySelect: (city: GeoPoint) => void;
@@ -16,9 +17,11 @@ interface SearchBarProps {
 
 export default function SearchBar({ 
   onCitySelect, 
-  placeholder = "Search for a city...",
+  placeholder,
   disabled = false 
 }: SearchBarProps) {
+  const strings = useStrings();
+  const actualPlaceholder = placeholder || strings.searchPlaceholder;
   const [query, setQuery] = useState('');
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -204,10 +207,10 @@ export default function SearchBar({
             onKeyDown={handleKeyDown}
             onFocus={handleInputFocus}
             onBlur={handleInputBlur}
-            placeholder={placeholder}
+            placeholder={actualPlaceholder}
             disabled={disabled}
             autoComplete="off"
-            aria-label="Search for a city"
+            aria-label={strings.searchLabel}
             aria-describedby="search-help"
                     aria-expanded={showSuggestions}
                     aria-haspopup="listbox"
@@ -256,12 +259,12 @@ export default function SearchBar({
             <>
               <div className="p-3 border-t border-slate-600">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-medium text-slate-300">Recent Searches</h3>
+                  <h3 className="text-sm font-medium text-slate-300">{strings.recentSearches}</h3>
                   <button
                     onClick={handleClearRecent}
                     className="text-slate-400 hover:text-slate-300 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-800 rounded"
                     title="Clear recent searches"
-                    aria-label="Clear all recent searches"
+                    aria-label={strings.clearRecentSearches}
                   >
                     <XMarkIcon className="h-4 w-4" aria-hidden="true" />
                   </button>
@@ -289,7 +292,7 @@ export default function SearchBar({
           {/* Loading State */}
           {isSearching && (
             <div className="p-3 text-center">
-              <div className="text-sm text-slate-400">Searching...</div>
+              <div className="text-sm text-slate-400">{strings.searching}</div>
             </div>
           )}
         </div>

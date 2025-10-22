@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { Units, DailyForecast } from '@/lib/types';
 import { formatTemp } from '@/lib/format';
 import { getOpenMeteoWeatherIcon, getVariedWeatherEmoji, getVariedWeatherDescription, isOpenMeteoDayTime } from '@/lib/weatherIconOpenMeteo';
+import { useStrings } from '@/lib/LocaleContext';
 
 interface ForecastItemProps {
   forecast: DailyForecast;
@@ -10,8 +11,9 @@ interface ForecastItemProps {
 }
 
 const ForecastItem = memo(function ForecastItem({ forecast, units, isToday = false }: ForecastItemProps) {
+  const strings = useStrings();
   const dayName = isToday 
-    ? 'Today' 
+    ? strings.today 
     : new Date(forecast.dt * 1000).toLocaleDateString('en-US', { weekday: 'short' });
 
   const weather = forecast.weather[0];
