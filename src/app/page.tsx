@@ -200,9 +200,9 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen" role="main">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-slate-900/80 backdrop-blur-sm border-b border-slate-700/50">
+      <header className="sticky top-0 z-10 bg-slate-900/80 backdrop-blur-sm border-b border-slate-700/50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
             <h1 className="text-2xl font-bold text-cyan-300">WeatherFlow</h1>
@@ -247,7 +247,7 @@ export default function Home() {
             )}
           </div>
         </div>
-      </div>
+      </header>
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">

@@ -38,48 +38,56 @@ const CurrentCard = memo(function CurrentCard({ weather, location, units, isLoad
     );
   }
 
+  const tempValue = formatTemp(weather.main.temp, units);
+  const feelsLikeValue = formatTemp(weather.main.feels_like, units);
+  const windValue = formatWind(weather.wind.speed, units);
+  const windDirection = getWindDirection(weather.wind.deg);
+  const pressureValue = formatPressure(weather.main.pressure, units);
+  const humidityValue = weather.main.humidity;
+  const description = weather.weather[0]?.description || 'Unknown';
+
   return (
-    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
+    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50" role="region" aria-labelledby="current-weather-title">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-100">{weather.name}</h2>
-          <p className="text-slate-400 text-sm">
+          <h2 id="current-weather-title" className="text-2xl font-bold text-slate-100">{weather.name}</h2>
+          <p className="text-slate-400 text-sm" aria-label={`Last updated ${formatDate(weather.dt, weather.timezone)}`}>
             {formatDate(weather.dt, weather.timezone)}
           </p>
         </div>
         <div className="text-right">
-          <div className="text-4xl font-bold text-cyan-300">
-            {formatTemp(weather.main.temp, units)}
+          <div className="text-4xl font-bold text-cyan-300" aria-label={`Temperature ${tempValue}`}>
+            {tempValue}
           </div>
-          <p className="text-slate-400 text-sm">
-            Feels like {formatTemp(weather.main.feels_like, units)}
+          <p className="text-slate-400 text-sm" aria-label={`Feels like ${feelsLikeValue}`}>
+            Feels like {feelsLikeValue}
           </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 text-sm">
+      <div className="grid grid-cols-2 gap-4 text-sm" role="group" aria-label="Weather details">
         <div className="flex items-center space-x-2">
-          <span className="text-slate-400">💨</span>
-          <span className="text-slate-300">
-            {formatWind(weather.wind.speed, units)} {getWindDirection(weather.wind.deg)}
+          <span className="text-slate-400" aria-hidden="true">💨</span>
+          <span className="text-slate-300" aria-label={`Wind ${windValue} ${windDirection}`}>
+            {windValue} {windDirection}
           </span>
         </div>
         <div className="flex items-center space-x-2">
-          <span className="text-slate-400">💧</span>
-          <span className="text-slate-300">
-            {weather.main.humidity}%
+          <span className="text-slate-400" aria-hidden="true">💧</span>
+          <span className="text-slate-300" aria-label={`Humidity ${humidityValue} percent`}>
+            {humidityValue}%
           </span>
         </div>
         <div className="flex items-center space-x-2">
-          <span className="text-slate-400">📊</span>
-          <span className="text-slate-300">
-            {formatPressure(weather.main.pressure, units)}
+          <span className="text-slate-400" aria-hidden="true">📊</span>
+          <span className="text-slate-300" aria-label={`Pressure ${pressureValue}`}>
+            {pressureValue}
           </span>
         </div>
         <div className="flex items-center space-x-2">
-          <span className="text-slate-400">🌡️</span>
-          <span className="text-slate-300 capitalize">
-            {weather.weather[0]?.description || 'Unknown'}
+          <span className="text-slate-400" aria-hidden="true">🌡️</span>
+          <span className="text-slate-300 capitalize" aria-label={`Weather condition ${description}`}>
+            {description}
           </span>
         </div>
       </div>

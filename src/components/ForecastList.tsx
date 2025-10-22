@@ -48,9 +48,12 @@ const ForecastList = memo(function ForecastList({ forecasts, units, isLoading = 
 
   return (
     <div className="space-y-3">
-      <h3 className="text-lg font-semibold text-slate-200 mb-4">5-Day Forecast</h3>
+      <h3 id="forecast-heading" className="text-lg font-semibold text-slate-200 mb-4">5-Day Forecast</h3>
       <motion.div 
         className="space-y-2"
+        role="list"
+        aria-labelledby="forecast-heading"
+        aria-label="5-day weather forecast"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}

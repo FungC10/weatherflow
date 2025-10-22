@@ -38,9 +38,9 @@ export default function MapPanel({ city, currentWeather, units, isVisible }: Map
 
   if (!city) {
     return (
-      <div className="w-full h-64 bg-slate-800/50 rounded-lg border border-slate-700/30 flex items-center justify-center">
+      <div className="w-full h-64 bg-slate-800/50 rounded-lg border border-slate-700/30 flex items-center justify-center" role="img" aria-label="Map placeholder">
         <div className="text-center">
-          <div className="text-slate-400 mb-2">🗺️</div>
+          <div className="text-slate-400 mb-2" aria-hidden="true">🗺️</div>
           <p className="text-slate-400 text-sm">Select a city to view the map</p>
         </div>
       </div>
@@ -51,7 +51,7 @@ export default function MapPanel({ city, currentWeather, units, isVisible }: Map
   const tileAttribution = process.env.NEXT_PUBLIC_TILE_ATTRIBUTION || '© OpenStreetMap contributors';
 
   return (
-    <div className="w-full h-64 rounded-lg overflow-hidden border border-slate-700/30">
+    <div className="w-full h-64 rounded-lg overflow-hidden border border-slate-700/30" role="img" aria-label={`Interactive map showing ${city.name} weather location`}>
       <MapContainer
         center={[city.lat, city.lon]}
         zoom={10}
@@ -71,10 +71,10 @@ export default function MapPanel({ city, currentWeather, units, isVisible }: Map
               </h3>
               {currentWeather && (
                 <div className="text-slate-600">
-                  <div className="text-lg font-medium">
+                  <div className="text-lg font-medium" aria-label={`Temperature ${formatTemp(currentWeather.main.temp, units)}`}>
                     {formatTemp(currentWeather.main.temp, units)}
                   </div>
-                  <div className="text-sm capitalize">
+                  <div className="text-sm capitalize" aria-label={`Weather condition ${currentWeather.weather[0]?.description}`}>
                     {currentWeather.weather[0]?.description}
                   </div>
                 </div>
