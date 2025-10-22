@@ -30,7 +30,7 @@ A modern weather application built with Next.js 14, TypeScript, and Tailwind CSS
 
 - Node.js 18+ 
 - npm or yarn
-- OpenWeatherMap API key
+- (Optional) OpenWeatherMap API key for premium features
 
 ### Installation
 
@@ -50,16 +50,15 @@ A modern weather application built with Next.js 14, TypeScript, and Tailwind CSS
    cp .env.example .env.local
    ```
    
-   Edit `.env.local` with your preferred weather provider:
+   The app works out of the box with Open-Meteo (no API key required). Optionally configure:
 
 ### 🌤 Environment Variables
-| Variable | Required | Description |
-|-----------|-----------|-------------|
-| `NEXT_PUBLIC_WEATHER_PROVIDER` | No | `"open-meteo"` (free) or `"openweather"` (requires key) |
-| `NEXT_PUBLIC_WEATHER_API_KEY` | Only if provider = openweather | Your OpenWeatherMap key |
-
-> The default build runs on Open-Meteo (no key needed).  
-> Switch to OpenWeatherMap anytime by setting the env vars above.
+| Variable | Required | Description | Default |
+|-----------|-----------|-------------|---------|
+| `NEXT_PUBLIC_WEATHER_PROVIDER` | No | `"open-meteo"` (free) or `"openweather"` (requires key) | `open-meteo` |
+| `NEXT_PUBLIC_WEATHER_API_KEY` | Only if provider = openweather | Your OpenWeatherMap key | - |
+| `NEXT_PUBLIC_TILE_URL` | No | Map tile URL template | OpenStreetMap |
+| `NEXT_PUBLIC_TILE_ATTRIBUTION` | No | Map attribution HTML | OpenStreetMap |
 
 **For Open-Meteo (default, no key needed):**
 ```
@@ -130,21 +129,26 @@ npm run test:ui
 2. **Deploy to Vercel**
    - Go to [Vercel](https://vercel.com)
    - Import your GitHub repository
-   - Add environment variables:
-     - `NEXT_PUBLIC_OWM_API_KEY`: Your OpenWeatherMap API key
-     - `NEXT_PUBLIC_TILE_URL`: Map tile URL (optional)
-     - `NEXT_PUBLIC_TILE_ATTRIBUTION`: Map attribution (optional)
-   - Deploy!
+   - The app will deploy automatically with Open-Meteo (no API key needed)
+   - Preview deployments are created automatically for each PR
 
-3. **Environment Variables in Vercel**
+3. **Environment Variables in Vercel (Optional)**
    - Go to your project dashboard
    - Navigate to Settings → Environment Variables
-   - Add the following variables:
+   - Add variables only if you want to use OpenWeatherMap:
      ```
-     NEXT_PUBLIC_OWM_API_KEY=your_api_key_here
+     NEXT_PUBLIC_WEATHER_PROVIDER=openweather
+     NEXT_PUBLIC_WEATHER_API_KEY=your_api_key_here
+     ```
+   - Map variables (optional):
+     ```
      NEXT_PUBLIC_TILE_URL=https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png
-     NEXT_PUBLIC_TILE_ATTRIBUTION=&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors
+     NEXT_PUBLIC_TILE_ATTRIBUTION=© OpenStreetMap contributors
      ```
+
+4. **Health Check**
+   - Your deployed app includes a health check at `/api/ping`
+   - Returns: `{ "ok": true, "version": "1.0.0", "timestamp": "...", "environment": "production" }`
 
 ### Other Platforms
 
@@ -155,26 +159,22 @@ The app can be deployed to any platform that supports Next.js:
 - **DigitalOcean App Platform**: Deploy from GitHub
 - **AWS Amplify**: Connect repository and deploy
 
-## Environment Variables
-
-| Variable | Description | Required | Default |
-|----------|-------------|----------|---------|
-| `NEXT_PUBLIC_OWM_API_KEY` | OpenWeatherMap API key | Yes | - |
-| `NEXT_PUBLIC_TILE_URL` | Map tile URL template | No | OpenStreetMap |
-| `NEXT_PUBLIC_TILE_ATTRIBUTION` | Map attribution HTML | No | OpenStreetMap |
-
 ## API Usage
 
-This app uses the OpenWeatherMap API:
+This app supports multiple weather providers:
 
+### Open-Meteo (Default, Free)
+- **Geocoding**: `https://geocoding-api.open-meteo.com/v1/search`
+- **Weather**: `https://api.open-meteo.com/v1/forecast`
+- No API key required
+- Free for unlimited use
+- High-quality weather data
+
+### OpenWeatherMap (Optional, Premium)
 - **Current Weather**: `https://api.openweathermap.org/data/2.5/weather`
 - **5-Day Forecast**: `https://api.openweathermap.org/data/3.0/onecall`
-
-Both endpoints require an API key. The free tier includes:
-- 1,000 calls per day
-- Current weather data
-- 5-day forecast
-- No credit card required
+- Requires API key
+- Free tier: 1,000 calls per day
 
 ## Contributing
 
