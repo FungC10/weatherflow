@@ -17,14 +17,14 @@ const PROVIDER = process.env.NEXT_PUBLIC_WEATHER_PROVIDER ?? 'open-meteo';
 const API_KEY = process.env.NEXT_PUBLIC_WEATHER_API_KEY;
 
 // Search for cities using Open-Meteo Geocoding API
-export async function searchCity(query: string): Promise<GeoPoint[]> {
+export async function searchCity(query: string, signal?: AbortSignal): Promise<GeoPoint[]> {
   if (!query.trim()) {
     return [];
   }
 
   const url = `${GEOCODING_BASE_URL}/search?name=${encodeURIComponent(query)}&count=5&language=en`;
   
-  const response = await fetch(url);
+  const response = await fetch(url, { signal });
   
   if (!response.ok) {
     throw new Error(`Failed to search cities: ${response.status} ${response.statusText}`);

@@ -41,9 +41,17 @@ export default function SearchBar({
   // Search for cities using TanStack Query
   const { data: searchResults = [], isLoading: isSearching } = useQuery({
     queryKey: queryKeys.city(debouncedQuery),
-    queryFn: () => searchCity(debouncedQuery),
+    queryFn: ({ signal }) => searchCity(debouncedQuery, signal),
     enabled: debouncedQuery.length >= 2 && !disabled,
     staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes garbage collection
+    retry: (failureCount, error) => {
+      // Don't retry on 4xx errors
+      if (error && 'status' in error && typeof error.status === 'number' && error.status >= 400 && error.status < 500) {
+        return false;
+      }
+      return failureCount < 1;
+    },
   });
 
   // Load recent searches on mount

@@ -39,7 +39,8 @@ describe('API Integration Tests', () => {
       ])
 
       expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining('geocoding-api.open-meteo.com/v1/search')
+        expect.stringContaining('geocoding-api.open-meteo.com/v1/search'),
+        expect.any(Object)
       )
     })
 
