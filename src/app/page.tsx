@@ -75,18 +75,18 @@ export default function Home() {
   const [originalUnits, setOriginalUnits] = useState<Units>('metric');
   const queryClient = useQueryClient();
 
-  // Fetch current weather when city is selected
+  // Fetch current weather when city is selected (always in metric for consistency)
   const { 
     data: currentWeather, 
     isLoading: isLoadingWeather, 
     error: weatherError 
   } = useQuery({
-    queryKey: selectedCity ? queryKeys.current(selectedCity.lat, selectedCity.lon, units) : ['no-query'],
+    queryKey: selectedCity ? queryKeys.current(selectedCity.lat, selectedCity.lon, 'metric') : ['no-query'],
     queryFn: async () => {
       if (!selectedCity) return null;
       // Only fetch on client side
       if (typeof window === 'undefined') return null;
-      return getCurrent(selectedCity.lat, selectedCity.lon, units);
+      return getCurrent(selectedCity.lat, selectedCity.lon, 'metric');
     },
     enabled: !!selectedCity && typeof window !== 'undefined',
     staleTime: 8 * 60 * 1000, // 8 minutes - current weather changes more frequently
@@ -101,18 +101,18 @@ export default function Home() {
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   });
 
-  // Fetch forecast when city is selected
+  // Fetch forecast when city is selected (always in metric for consistency)
   const { 
     data: forecastData, 
     isLoading: isLoadingForecast, 
     error: forecastError 
   } = useQuery({
-    queryKey: selectedCity ? queryKeys.forecast(selectedCity.lat, selectedCity.lon, units) : ['no-forecast-query'],
+    queryKey: selectedCity ? queryKeys.forecast(selectedCity.lat, selectedCity.lon, 'metric') : ['no-forecast-query'],
     queryFn: async () => {
       if (!selectedCity) return null;
       // Only fetch on client side
       if (typeof window === 'undefined') return null;
-      return getForecast(selectedCity.lat, selectedCity.lon, units);
+      return getForecast(selectedCity.lat, selectedCity.lon, 'metric');
     },
     enabled: !!selectedCity && typeof window !== 'undefined',
     staleTime: 30 * 60 * 1000, // 30 minutes - forecast changes less frequently
@@ -127,13 +127,13 @@ export default function Home() {
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   });
 
-  // Store original data when it's first fetched
+  // Store original data when it's first fetched (always in metric)
   useEffect(() => {
     if (currentWeather && !originalCurrentWeather) {
       setOriginalCurrentWeather(currentWeather);
-      setOriginalUnits(units);
+      setOriginalUnits('metric'); // Always metric since we fetch in metric
     }
-  }, [currentWeather, originalCurrentWeather, units]);
+  }, [currentWeather, originalCurrentWeather]);
 
   useEffect(() => {
     if (forecastData && !originalForecast) {
@@ -141,18 +141,18 @@ export default function Home() {
     }
   }, [forecastData, originalForecast]);
 
-  // Convert data based on current units
+  // Convert data based on current units (always from metric)
   const convertedCurrentWeather = useMemo(() => {
     if (!originalCurrentWeather) return currentWeather;
-    if (units === originalUnits) return originalCurrentWeather;
-    return convertCurrentWeather(originalCurrentWeather, originalUnits, units);
-  }, [originalCurrentWeather, originalUnits, units, currentWeather]);
+    if (units === 'metric') return originalCurrentWeather;
+    return convertCurrentWeather(originalCurrentWeather, 'metric', units);
+  }, [originalCurrentWeather, units, currentWeather]);
 
   const convertedForecastData = useMemo(() => {
     if (!originalForecast) return forecastData;
-    if (units === originalUnits) return originalForecast;
-    return convertForecast(originalForecast, originalUnits, units);
-  }, [originalForecast, originalUnits, units, forecastData]);
+    if (units === 'metric') return originalForecast;
+    return convertForecast(originalForecast, 'metric', units);
+  }, [originalForecast, units, forecastData]);
 
   // Get forecast data from API - memoized to prevent unnecessary re-renders
   const forecasts = useMemo(() => convertedForecastData?.daily || [], [convertedForecastData?.daily]);
@@ -302,8 +302,8 @@ export default function Home() {
             />
           )}
 
-          {/* Loading State - only show when city is selected and loading */}
-          {selectedCity && (isLoadingWeather || isLoadingForecast) && (
+          {/* Loading State - only show when city is selected and we don't have data yet */}
+          {selectedCity && !originalCurrentWeather && (isLoadingWeather || isLoadingForecast) && (
             <LoadingShimmer 
               type="full" 
               message={strings.loadingWeather}
@@ -325,7 +325,7 @@ export default function Home() {
           )}
 
           {/* Weather Content - only show when city is selected and data is loaded */}
-          {selectedCity && currentWeather && !isLoadingWeather && !isLoadingForecast && (
+          {selectedCity && originalCurrentWeather && !isLoadingWeather && !isLoadingForecast && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold text-slate-200">
