@@ -28,6 +28,7 @@ export default function SearchBar({
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Debounced search query
   const [debouncedQuery, setDebouncedQuery] = useState('');
@@ -40,6 +41,15 @@ export default function SearchBar({
 
     return () => clearTimeout(timer);
   }, [query]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (hideTimeoutRef.current) {
+        clearTimeout(hideTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Search for cities using TanStack Query
   const { data: searchResults = [], isLoading: isSearching } = useQuery({
@@ -105,20 +115,37 @@ export default function SearchBar({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim() && searchResults.length > 0) {
-      // Select the first search result
-      handleCitySelect(searchResults[0]);
+      // Select the first search result but keep suggestions visible
+      handleCitySelect(searchResults[0], false);
     }
   };
 
-  const handleCitySelect = useCallback((city: GeoPoint) => {
+  const scheduleHideSuggestions = useCallback(() => {
+    // Clear any existing timeout
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+    }
+    // Hide suggestions after a short delay
+    hideTimeoutRef.current = setTimeout(() => {
+      setShowSuggestions(false);
+      setFocusedIndex(-1);
+    }, 2000); // 2 seconds delay
+  }, []);
+
+  const handleCitySelect = useCallback((city: GeoPoint, hideSuggestions = true) => {
     onCitySelect(city);
     setQuery(city.name || '');
-    setShowSuggestions(false);
-    setFocusedIndex(-1);
+    if (hideSuggestions) {
+      setShowSuggestions(false);
+      setFocusedIndex(-1);
+    } else {
+      // Schedule hiding suggestions after a delay
+      scheduleHideSuggestions();
+    }
     if (city.name) {
       addRecentSearch(city.name);
     }
-  }, [onCitySelect]);
+  }, [onCitySelect, scheduleHideSuggestions]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     const recentSearchOptions = recentSearches.map(name => ({ name, type: 'recent' as const }));
@@ -149,7 +176,7 @@ export default function SearchBar({
         if (focusedIndex >= 0 && focusedIndex < allOptions.length) {
           const selected = allOptions[focusedIndex];
           if (selected.type === 'search') {
-            handleCitySelect(selected as GeoPoint);
+            handleCitySelect(selected as GeoPoint, false); // Keep suggestions visible
           } else if (selected.type === 'recent') {
             // This is a recent search string, we need to search for it
             setQuery(selected.name);
@@ -189,6 +216,11 @@ export default function SearchBar({
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(e.target.value);
     setFocusedIndex(-1);
+    // Cancel any pending hide timeout when user types
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+      hideTimeoutRef.current = null;
+    }
   }, []);
 
 
