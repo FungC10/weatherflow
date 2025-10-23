@@ -63,11 +63,11 @@ const CurrentCard = memo(function CurrentCard({ weather, location, units, isLoad
   const description = weather.weather[0]?.description || 'Unknown';
 
   return (
-    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50" role="region" aria-labelledby="current-weather-title">
+    <div className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl rounded-3xl p-8 border border-slate-200/50 dark:border-slate-700/50 shadow-xl" role="region" aria-labelledby="current-weather-title">
       <div className="flex items-center justify-between mb-4">
         <div className="flex-1">
           <div className="flex items-center space-x-3">
-            <h2 id="current-weather-title" className="text-2xl font-bold text-slate-100">{weather.name}</h2>
+            <h2 id="current-weather-title" className="text-2xl font-bold text-slate-800 dark:text-slate-100">{weather.name}</h2>
             {location && (
               <FavoriteButton 
                 city={location} 
@@ -75,15 +75,15 @@ const CurrentCard = memo(function CurrentCard({ weather, location, units, isLoad
               />
             )}
           </div>
-          <p className="text-slate-400 text-sm" aria-label={`${strings.lastUpdated} ${formatDate(weather.dt, weather.timezone)}`}>
+          <p className="text-slate-600 dark:text-slate-400 text-sm" aria-label={`${strings.lastUpdated} ${formatDate(weather.dt, weather.timezone)}`}>
             {formatDate(weather.dt, weather.timezone)}
           </p>
         </div>
         <div className="text-right">
-          <div className="text-4xl font-bold text-cyan-300" aria-label={`${strings.temperature} ${tempValue}`}>
+          <div className="text-4xl font-bold text-cyan-600 dark:text-cyan-300" aria-label={`${strings.temperature} ${tempValue}`}>
             {tempValue}
           </div>
-          <p className="text-slate-400 text-sm" aria-label={`${strings.feelsLike} ${feelsLikeValue}`}>
+          <p className="text-slate-600 dark:text-slate-400 text-sm" aria-label={`${strings.feelsLike} ${feelsLikeValue}`}>
             {strings.feelsLike} {feelsLikeValue}
           </p>
         </div>
@@ -92,25 +92,25 @@ const CurrentCard = memo(function CurrentCard({ weather, location, units, isLoad
       <div className="grid grid-cols-2 gap-4 text-sm" role="group" aria-label={strings.weatherDetails}>
         <div className="flex items-center space-x-2">
           <span className="text-slate-400" aria-hidden="true">💨</span>
-          <span className="text-slate-300" aria-label={`${strings.wind} ${windValue} ${windDirection}`}>
+          <span className="text-slate-700 dark:text-slate-300" aria-label={`${strings.wind} ${windValue} ${windDirection}`}>
             {windValue} {windDirection}
           </span>
         </div>
         <div className="flex items-center space-x-2">
           <span className="text-slate-400" aria-hidden="true">💧</span>
-          <span className="text-slate-300" aria-label={`${strings.humidity} ${humidityValue} percent`}>
+          <span className="text-slate-700 dark:text-slate-300" aria-label={`${strings.humidity} ${humidityValue} percent`}>
             {humidityValue}%
           </span>
         </div>
         <div className="flex items-center space-x-2">
           <span className="text-slate-400" aria-hidden="true">📊</span>
-          <span className="text-slate-300" aria-label={`${strings.pressure} ${pressureValue}`}>
+          <span className="text-slate-700 dark:text-slate-300" aria-label={`${strings.pressure} ${pressureValue}`}>
             {pressureValue}
           </span>
         </div>
         <div className="flex items-center space-x-2">
           <span className="text-slate-400" aria-hidden="true">🌡️</span>
-          <span className="text-slate-300 capitalize" aria-label={`${strings.weatherCondition} ${description}`}>
+          <span className="text-slate-700 dark:text-slate-300 capitalize" aria-label={`${strings.weatherCondition} ${description}`}>
             {description}
           </span>
         </div>

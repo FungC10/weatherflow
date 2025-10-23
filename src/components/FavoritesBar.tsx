@@ -96,7 +96,7 @@ export default function FavoritesBar({ onCitySelect, className = '' }: Favorites
   if (favorites.length === 0) {
     return (
       <div className={`text-center py-4 ${className}`}>
-        <div className="text-slate-400 text-sm">
+        <div className="text-slate-600 dark:text-slate-400 text-sm">
           <StarOutlineIcon className="h-5 w-5 mx-auto mb-2" aria-hidden="true" />
           <p>{strings.noFavorites}</p>
           <p className="text-xs mt-1">{strings.addFavoritesMessage}</p>
@@ -115,7 +115,7 @@ export default function FavoritesBar({ onCitySelect, className = '' }: Favorites
     >
       <div className="flex items-center space-x-2">
         <StarIcon className="h-5 w-5 text-amber-400" aria-hidden="true" />
-        <h3 className="text-sm font-medium text-slate-300">{strings.favorites}</h3>
+        <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300">{strings.favorites}</h3>
       </div>
       
       <div className="flex flex-wrap gap-2">
@@ -125,11 +125,12 @@ export default function FavoritesBar({ onCitySelect, className = '' }: Favorites
             data-index={index}
             tabIndex={focusedIndex === index ? 0 : -1}
             className={`
-              group flex items-center space-x-2 px-3 py-2 bg-slate-800/50 hover:bg-slate-700/50 
-              rounded-lg border border-slate-600/50 hover:border-slate-500/50 
-              transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 
-              focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-900
-              ${focusedIndex === index ? 'ring-2 ring-cyan-400 ring-offset-2 ring-offset-slate-900' : ''}
+              group flex items-center space-x-2 px-3 py-2 bg-white/60 dark:bg-slate-800/50 hover:bg-white/80 dark:hover:bg-slate-700/50 
+              rounded-xl border border-slate-200/50 dark:border-slate-600/50 hover:border-slate-300/50 dark:hover:border-slate-500/50 
+              transition-all duration-300 cursor-pointer focus:outline-none focus:ring-2 
+              focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-900
+              ${focusedIndex === index ? 'ring-2 ring-cyan-400 ring-offset-2 ring-offset-white dark:ring-offset-slate-900' : ''}
+              hover:shadow-md hover:scale-105 active:scale-95
             `}
             onClick={() => handleCitySelect(favorite)}
             onKeyDown={(e) => {
@@ -141,10 +142,10 @@ export default function FavoritesBar({ onCitySelect, className = '' }: Favorites
             role="button"
             aria-label={`${favorite.name}, ${favorite.country}. Click to view weather.`}
           >
-            <span className="text-slate-200 text-sm font-medium truncate max-w-32">
+            <span className="text-slate-800 dark:text-slate-200 text-sm font-medium truncate max-w-32">
               {favorite.name}
             </span>
-            <span className="text-slate-400 text-xs">
+            <span className="text-slate-600 dark:text-slate-400 text-xs">
               {favorite.country}
             </span>
             <button
