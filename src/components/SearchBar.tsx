@@ -70,7 +70,10 @@ export default function SearchBar({
   // Load recent searches on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      setRecentSearches(getRecentSearches());
+      const recent = getRecentSearches();
+      // Filter out any non-string values that might have been stored incorrectly
+      const validRecent = recent.filter((item): item is string => typeof item === 'string');
+      setRecentSearches(validRecent);
     }
   }, []);
 
@@ -134,7 +137,7 @@ export default function SearchBar({
 
   const handleCitySelect = useCallback((city: GeoPoint, hideSuggestions = true) => {
     onCitySelect(city);
-    setQuery(city.name || '');
+    setQuery(city.name || city.lat?.toString() || 'Unknown Location');
     if (hideSuggestions) {
       setShowSuggestions(false);
       setFocusedIndex(-1);
@@ -142,7 +145,7 @@ export default function SearchBar({
       // Schedule hiding suggestions after a delay
       scheduleHideSuggestions();
     }
-    if (city.name) {
+    if (city.name && typeof city.name === 'string') {
       addRecentSearch(city.name);
     }
   }, [onCitySelect, scheduleHideSuggestions]);
@@ -179,7 +182,7 @@ export default function SearchBar({
             handleCitySelect(selected as GeoPoint, false); // Keep suggestions visible
           } else if (selected.type === 'recent') {
             // This is a recent search string, we need to search for it
-            setQuery(selected.name);
+            setQuery(selected.name || '');
           }
         } else {
           handleSubmit(e);
@@ -306,7 +309,7 @@ export default function SearchBar({
                 {recentSearches.map((search, index) => (
                   <button
                     key={`recent-${index}`}
-                    onClick={() => setQuery(search)}
+                    onClick={() => setQuery(typeof search === 'string' ? search : '')}
                     className={`w-full text-left px-3 py-2 text-sm text-slate-300 hover:bg-slate-700/50 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-1 focus:ring-offset-slate-800 ${
                       (index + searchResults.length) === focusedIndex ? 'bg-slate-700/50 ring-2 ring-cyan-400' : ''
                     }`}
@@ -314,7 +317,7 @@ export default function SearchBar({
                     aria-selected={(index + searchResults.length) === focusedIndex}
                     tabIndex={-1}
                   >
-                    {search}
+                    {typeof search === 'string' ? search : 'Invalid search'}
                   </button>
                 ))}
               </div>

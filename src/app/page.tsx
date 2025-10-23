@@ -165,7 +165,7 @@ export default function Home() {
     // Reset original data when selecting a new city
     setOriginalCurrentWeather(null);
     setOriginalForecast(null);
-    if (city.name) {
+    if (city.name && typeof city.name === 'string') {
       addRecentSearch(city.name);
     }
   }, []);
@@ -185,7 +185,10 @@ export default function Home() {
       
       setSelectedCity(locationCity);
       setSearchQuery(locationCity.name || 'Current Location');
-      addRecentSearch(locationCity.name || 'Current Location');
+      const locationName = locationCity.name || 'Current Location';
+      if (typeof locationName === 'string') {
+        addRecentSearch(locationName);
+      }
     } catch (error) {
       const geoError = error as GeoLocationError;
       setLocationError(getLocationErrorMessage(geoError));
