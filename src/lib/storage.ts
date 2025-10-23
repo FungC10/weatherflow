@@ -31,22 +31,29 @@ export function removeKey(key: string): void {
 }
 
 // Recent searches helpers
-export function getRecentSearches(): string[] {
+export function getRecentSearches(): GeoPoint[] {
   try {
     if (typeof window === 'undefined') return [];
-    const recent = getJSON<string[]>('weatherflow:recent');
+    const recent = getJSON<GeoPoint[]>('weatherflow:recent');
     return recent || [];
   } catch {
     return [];
   }
 }
 
-export function addRecentSearch(search: string): void {
+export function addRecentSearch(city: GeoPoint): void {
   try {
     if (typeof window === 'undefined') return;
     const recent = getRecentSearches();
-    const updated = pushUnique(recent, search, 6);
-    setJSON('weatherflow:recent', updated);
+    // Remove existing city if it exists (by lat/lon comparison)
+    const filtered = recent.filter(existing => 
+      existing.lat !== city.lat || existing.lon !== city.lon
+    );
+    // Add new city to the beginning
+    const updated = [city, ...filtered];
+    // Keep only the most recent cities
+    const limited = updated.slice(0, 6);
+    setJSON('weatherflow:recent', limited);
   } catch {
     // Silently fail if localStorage is not available
   }

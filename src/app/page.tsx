@@ -160,14 +160,14 @@ export default function Home() {
 
   const handleCitySelect = useCallback((city: GeoPoint) => {
     setSelectedCity(city);
-    setSearchQuery(city.name || '');
+    // Create a display name that includes country for better identification
+    const displayName = city.country ? `${city.name}, ${city.country}` : city.name;
+    setSearchQuery(displayName || '');
     setLocationError(null);
     // Reset original data when selecting a new city
     setOriginalCurrentWeather(null);
     setOriginalForecast(null);
-    if (city.name && typeof city.name === 'string') {
-      addRecentSearch(city.name);
-    }
+    // Note: Recent search is handled by SearchBar component
   }, []);
 
   const handleUseLocation = async () => {

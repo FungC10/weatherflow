@@ -23,7 +23,7 @@ export default function SearchBar({
   const strings = useStrings();
   const actualPlaceholder = placeholder || strings.searchPlaceholder;
   const [query, setQuery] = useState('');
-  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [recentSearches, setRecentSearches] = useState<GeoPoint[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -71,8 +71,13 @@ export default function SearchBar({
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const recent = getRecentSearches();
-      // Filter out any non-string values that might have been stored incorrectly
-      const validRecent = recent.filter((item): item is string => typeof item === 'string');
+      // Filter out any invalid city objects
+      const validRecent = recent.filter((city): city is GeoPoint => 
+        city && typeof city === 'object' && 
+        typeof city.lat === 'number' && 
+        typeof city.lon === 'number' &&
+        typeof city.name === 'string'
+      );
       setRecentSearches(validRecent);
     }
   }, []);
@@ -137,7 +142,9 @@ export default function SearchBar({
 
   const handleCitySelect = useCallback((city: GeoPoint, hideSuggestions = true) => {
     onCitySelect(city);
-    setQuery(city.name || city.lat?.toString() || 'Unknown Location');
+    // Create a display name that includes country for better identification
+    const displayName = city.country ? `${city.name}, ${city.country}` : city.name;
+    setQuery(displayName || city.lat?.toString() || 'Unknown Location');
     if (hideSuggestions) {
       setShowSuggestions(false);
       setFocusedIndex(-1);
@@ -145,13 +152,12 @@ export default function SearchBar({
       // Schedule hiding suggestions after a delay
       scheduleHideSuggestions();
     }
-    if (city.name && typeof city.name === 'string') {
-      addRecentSearch(city.name);
-    }
+    // Save the city object to recent searches
+    addRecentSearch(city);
   }, [onCitySelect, scheduleHideSuggestions]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    const recentSearchOptions = recentSearches.map(name => ({ name, type: 'recent' as const }));
+    const recentSearchOptions = recentSearches.map(city => ({ ...city, type: 'recent' as const }));
     const allOptions = [...searchResults.map(city => ({ ...city, type: 'search' as const })), ...recentSearchOptions];
     
     if (!showSuggestions || allOptions.length === 0) {
@@ -181,8 +187,8 @@ export default function SearchBar({
           if (selected.type === 'search') {
             handleCitySelect(selected as GeoPoint, false); // Keep suggestions visible
           } else if (selected.type === 'recent') {
-            // This is a recent search string, we need to search for it
-            setQuery(selected.name || '');
+            // This is a recent search city, select it directly
+            handleCitySelect(selected as GeoPoint, false);
           }
         } else {
           handleSubmit(e);
@@ -306,10 +312,10 @@ export default function SearchBar({
                 </div>
               </div>
               <div className="p-2">
-                {recentSearches.map((search, index) => (
+                {recentSearches.map((city, index) => (
                   <button
-                    key={`recent-${index}`}
-                    onClick={() => setQuery(typeof search === 'string' ? search : '')}
+                    key={`recent-${city.lat}-${city.lon}`}
+                    onClick={() => handleCitySelect(city)}
                     className={`w-full text-left px-3 py-2 text-sm text-slate-300 hover:bg-slate-700/50 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-1 focus:ring-offset-slate-800 ${
                       (index + searchResults.length) === focusedIndex ? 'bg-slate-700/50 ring-2 ring-cyan-400' : ''
                     }`}
@@ -317,7 +323,10 @@ export default function SearchBar({
                     aria-selected={(index + searchResults.length) === focusedIndex}
                     tabIndex={-1}
                   >
-                    {typeof search === 'string' ? search : 'Invalid search'}
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">{city.name}</span>
+                      <span className="text-xs text-slate-500">{city.country}</span>
+                    </div>
                   </button>
                 ))}
               </div>
