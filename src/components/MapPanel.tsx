@@ -51,7 +51,7 @@ export default function MapPanel({ city, currentWeather, units, isVisible }: Map
   const tileAttribution = process.env.NEXT_PUBLIC_TILE_ATTRIBUTION || '© OpenStreetMap contributors';
 
   return (
-    <div className="w-full h-full rounded-lg overflow-hidden border border-slate-700/30" role="img" aria-label={`Interactive map showing ${city.name} weather location`}>
+    <div className="w-full h-full overflow-hidden" role="img" aria-label={`Interactive map showing ${city.name} weather location`}>
       <MapContainer
         center={[city.lat, city.lon]}
         zoom={10}
