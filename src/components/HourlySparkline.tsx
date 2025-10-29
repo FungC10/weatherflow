@@ -28,9 +28,8 @@ const HourlySparkline = memo(function HourlySparkline({
 
     const loadChart = async () => {
       try {
-        // Dynamic import of Chart.js
-        const { Chart, registerables } = await import('chart.js');
-        Chart.register(...registerables);
+        // Dynamic import of Chart.js with auto-registration (more compatible)
+        const { default: Chart } = await import('chart.js/auto');
 
         if (!mounted || !canvasRef.current) return;
 
@@ -47,7 +46,9 @@ const HourlySparkline = memo(function HourlySparkline({
         const temperatures = next24Hours.map(data => data.temperature);
 
         // Create the chart
-        const chart = new Chart(canvasRef.current, {
+        const ctx = canvasRef.current.getContext('2d');
+        if (!ctx) return;
+        const chart = new Chart(ctx, {
           type: 'line',
           data: {
             labels,
