@@ -9,12 +9,14 @@ interface HourlySparklineProps {
   hourlyData: HourlyData[];
   units: Units;
   className?: string;
+  titleText?: string;
 }
 
 const HourlySparkline = memo(function HourlySparkline({ 
   hourlyData, 
   units, 
-  className = '' 
+  className = '',
+  titleText
 }: HourlySparklineProps) {
   const strings = useStrings();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -169,8 +171,8 @@ const HourlySparkline = memo(function HourlySparkline({
 
   return (
     <div className={`space-y-2 ${className}`}>
-      <h4 className="text-sm font-medium text-slate-300">
-        {strings.hourlyTemperature || '24-Hour Temperature'}
+      <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">
+        {titleText || strings.hourlyTemperature || '24-Hour Temperature'}
       </h4>
       <div className="relative h-16">
         <canvas
