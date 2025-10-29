@@ -23,14 +23,7 @@ import ThemeToggle from '@/components/ThemeToggle';
 import dynamic from 'next/dynamic';
 
 // Lazy-load MapPanel to protect initial bundle
-const MapPanel = dynamic(() => import('@/components/MapPanel'), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full h-full min-h-[16rem] flex items-center justify-center">
-      <div className="animate-spin rounded-full h-8 w-8 border-2 border-cyan-400 border-t-transparent" />
-    </div>
-  )
-});
+const MapPanel = dynamic(() => import('@/components/MapPanel'), { ssr: false, loading: () => null });
 
 // Lazy-load ForecastList for better code splitting
 const ForecastList = dynamic(() => import('@/components/ForecastList'), {
@@ -68,6 +61,7 @@ export default function Home() {
   const [locationError, setLocationError] = useState<string | null>(null);
   const [isRequestingLocation, setIsRequestingLocation] = useState(false);
   const [showMap, setShowMap] = useState(false);
+  const [isMapLoading, setIsMapLoading] = useState(false);
   const [originalCurrentWeather, setOriginalCurrentWeather] = useState<CurrentWeather | null>(null);
   const [originalForecast, setOriginalForecast] = useState<Forecast | null>(null);
   const [originalUnits, setOriginalUnits] = useState<Units>('metric');
@@ -407,18 +401,24 @@ export default function Home() {
                       </div>
                       
                       {showMap ? (
-                        <div className="flex-1 min-h-[16rem] rounded-2xl overflow-hidden border border-slate-200/50 dark:border-slate-700/50">
+                        <div className="relative flex-1 min-h-[16rem] rounded-2xl overflow-hidden border border-slate-200/50 dark:border-slate-700/50">
+                          {isMapLoading && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-transparent">
+                              <div className="animate-spin rounded-full h-8 w-8 border-2 border-cyan-400 border-t-transparent" />
+                            </div>
+                          )}
                           <MapPanel
                             city={selectedCity}
                             currentWeather={convertedCurrentWeather || null}
                             units={units}
                             isVisible={showMap}
+                            onReady={() => setIsMapLoading(false)}
                           />
                         </div>
                       ) : (
                         <button
                           type="button"
-                          onClick={() => setShowMap(true)}
+                          onClick={() => { setIsMapLoading(true); setShowMap(true); }}
                           className="flex-1 min-h-[16rem] w-full rounded-2xl bg-slate-100/50 dark:bg-slate-700/50 border border-slate-200/50 dark:border-slate-700/50 flex items-center justify-center hover:bg-slate-100/80 dark:hover:bg-slate-700/70 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-900"
                           aria-label="Show map"
                         >

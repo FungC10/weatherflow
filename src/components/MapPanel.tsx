@@ -20,9 +20,10 @@ interface MapPanelProps {
   currentWeather: CurrentWeather | null;
   units: Units;
   isVisible: boolean;
+  onReady?: () => void;
 }
 
-export default function MapPanel({ city, currentWeather, units, isVisible }: MapPanelProps) {
+export default function MapPanel({ city, currentWeather, units, isVisible, onReady }: MapPanelProps) {
   const mapRef = useRef<any>(null);
 
   // Update map center when city changes
@@ -58,6 +59,7 @@ export default function MapPanel({ city, currentWeather, units, isVisible }: Map
         style={{ height: '100%', width: '100%' }}
         ref={mapRef}
         className="z-0"
+        whenReady={() => { if (onReady) onReady(); }}
       >
         <TileLayer
           url={tileUrl}
