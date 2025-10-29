@@ -27,7 +27,7 @@ const ForecastItem = memo(function ForecastItem({ forecast, units, isToday = fal
 
   return (
     <div 
-      className="bg-white/5 backdrop-blur-sm rounded-lg p-4 border border-slate-700/30 hover:bg-white/10 transition-all duration-200 hover:shadow-lg"
+      className="bg-slate-50/60 dark:bg-white/5 backdrop-blur-sm rounded-lg p-4 border border-slate-200/60 dark:border-slate-700/30 hover:bg-slate-100/60 dark:hover:bg-white/10 transition-all duration-200 hover:shadow-lg"
       role="listitem"
       aria-label={`${dayName} forecast: ${description}, high ${maxTemp}, low ${minTemp}`}
     >
@@ -35,18 +35,18 @@ const ForecastItem = memo(function ForecastItem({ forecast, units, isToday = fal
         <div className="flex-1 flex items-center space-x-4">
           <div className="text-3xl" aria-hidden="true">{weatherEmoji}</div>
           <div className="flex-1">
-            <h4 className="font-semibold text-slate-200 text-base">{dayName}</h4>
-            <p className="text-slate-400 text-sm capitalize" aria-label={`Weather condition: ${description}`}>
+            <h4 className="font-semibold text-slate-800 dark:text-slate-200 text-base">{dayName}</h4>
+            <p className="text-slate-600 dark:text-slate-400 text-sm capitalize" aria-label={`Weather condition: ${description}`}>
               {description}
             </p>
           </div>
         </div>
         <div className="flex items-center space-x-3">
           <div className="text-right">
-            <div className="text-slate-200 text-lg font-semibold" aria-label={`High temperature ${maxTemp}`}>
+            <div className="text-slate-900 dark:text-slate-200 text-lg font-semibold" aria-label={`High temperature ${maxTemp}`}>
               {maxTemp}
             </div>
-            <div className="text-slate-500 text-sm" aria-label={`Low temperature ${minTemp}`}>
+            <div className="text-slate-600 dark:text-slate-500 text-sm" aria-label={`Low temperature ${minTemp}`}>
               {minTemp}
             </div>
           </div>

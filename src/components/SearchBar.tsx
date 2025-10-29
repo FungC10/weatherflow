@@ -312,8 +312,8 @@ export default function SearchBar({
                   tabIndex={-1}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-medium">{city.name}</span>
-                    <span className="text-xs text-slate-500 dark:text-slate-400">{city.country}</span>
+                    <span className="font-medium text-slate-800 dark:text-slate-200">{city.name}</span>
+                    <span className="text-xs text-slate-600 dark:text-slate-400">{city.country}</span>
                   </div>
                 </button>
               ))}
@@ -323,9 +323,9 @@ export default function SearchBar({
           {/* Recent Searches */}
           {recentSearches.length > 0 && (
             <>
-              <div className="p-3 border-t border-slate-600">
+              <div className="p-3 border-t border-slate-200 dark:border-slate-600">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-medium text-slate-300">{strings.recentSearches}</h3>
+                  <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300">{strings.recentSearches}</h3>
                   <button
                     onClick={handleClearRecent}
                     className="text-slate-400 hover:text-slate-300 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-800 rounded"
@@ -341,16 +341,16 @@ export default function SearchBar({
                   <button
                     key={`recent-${city.lat}-${city.lon}`}
                     onClick={() => handleCitySelect(city)}
-                    className={`w-full text-left px-3 py-2 text-sm text-slate-300 hover:bg-slate-700/50 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-1 focus:ring-offset-slate-800 ${
-                      (index + searchResults.length) === focusedIndex ? 'bg-slate-700/50 ring-2 ring-cyan-400' : ''
+                    className={`w-full text-left px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100/60 dark:hover:bg-slate-700/50 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-1 focus:ring-offset-white dark:focus:ring-offset-slate-800 ${
+                      (index + searchResults.length) === focusedIndex ? 'bg-slate-100 dark:bg-slate-700/50 ring-2 ring-cyan-400' : ''
                     }`}
                     role="option"
                     aria-selected={(index + searchResults.length) === focusedIndex}
                     tabIndex={-1}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-medium">{city.name}</span>
-                      <span className="text-xs text-slate-500">{city.country}</span>
+                      <span className="font-medium text-slate-800 dark:text-slate-200">{city.name}</span>
+                      <span className="text-xs text-slate-600 dark:text-slate-400">{city.country}</span>
                     </div>
                   </button>
                 ))}
