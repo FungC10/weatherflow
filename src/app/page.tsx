@@ -384,7 +384,7 @@ export default function Home() {
                 {/* Weather Cards Grid */}
                 <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
                   {/* Current Weather - Takes 2 columns on XL screens */}
-                  <div className="xl:col-span-2">
+                  <div className="xl:col-span-2 h-full">
                     <CurrentCard 
                       weather={convertedCurrentWeather || undefined}
                       location={selectedCity}
@@ -394,8 +394,8 @@ export default function Home() {
                   </div>
 
                   {/* Map Panel - Takes 1 column on XL screens */}
-                  <div className="space-y-6">
-                    <div className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl rounded-3xl p-6 border border-slate-200/50 dark:border-slate-700/50 shadow-lg">
+                  <div className="space-y-6 h-full">
+                    <div className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl rounded-3xl p-6 border border-slate-200/50 dark:border-slate-700/50 shadow-lg h-full flex flex-col">
                       <div className="flex items-center justify-between mb-4">
                         <h3 className="text-xl font-semibold text-slate-800 dark:text-slate-200">Map View</h3>
                         <button
@@ -410,7 +410,7 @@ export default function Home() {
                       </div>
                       
                       {showMap ? (
-                        <div className="h-80 rounded-2xl overflow-hidden border border-slate-200/50 dark:border-slate-700/50">
+                        <div className="flex-1 min-h-[16rem] rounded-2xl overflow-hidden border border-slate-200/50 dark:border-slate-700/50">
                           <MapPanel
                             city={selectedCity}
                             currentWeather={convertedCurrentWeather || null}
@@ -422,7 +422,7 @@ export default function Home() {
                         <button
                           type="button"
                           onClick={() => setShowMap(true)}
-                          className="h-80 w-full rounded-2xl bg-slate-100/50 dark:bg-slate-700/50 border border-slate-200/50 dark:border-slate-700/50 flex items-center justify-center hover:bg-slate-100/80 dark:hover:bg-slate-700/70 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-900"
+                          className="flex-1 min-h-[16rem] w-full rounded-2xl bg-slate-100/50 dark:bg-slate-700/50 border border-slate-200/50 dark:border-slate-700/50 flex items-center justify-center hover:bg-slate-100/80 dark:hover:bg-slate-700/70 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-900"
                           aria-label="Show map"
                         >
                           <span className="text-slate-600 dark:text-slate-300">Click to show map</span>

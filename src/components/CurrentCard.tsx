@@ -63,7 +63,7 @@ const CurrentCard = memo(function CurrentCard({ weather, location, units, isLoad
   const description = weather.weather[0]?.description || 'Unknown';
 
   return (
-    <div className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl rounded-3xl p-8 border border-slate-200/50 dark:border-slate-700/50 shadow-xl" role="region" aria-labelledby="current-weather-title">
+    <div className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl rounded-3xl p-8 border border-slate-200/50 dark:border-slate-700/50 shadow-xl h-full" role="region" aria-labelledby="current-weather-title">
       <div className="flex items-center justify-between mb-4">
         <div className="flex-1">
           <div className="flex items-center space-x-3">
