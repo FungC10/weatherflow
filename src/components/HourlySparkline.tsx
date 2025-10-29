@@ -55,16 +55,16 @@ const HourlySparkline = memo(function HourlySparkline({
             datasets: [{
               data: temperatures,
               borderColor: '#22d3ee', // cyan-400
-              backgroundColor: 'rgba(34, 211, 238, 0.1)',
+              backgroundColor: 'transparent',
               borderWidth: 2,
               pointRadius: 0,
-              pointHoverRadius: 4,
+              pointHoverRadius: 3,
               pointBackgroundColor: '#22d3ee',
               pointBorderColor: '#22d3ee',
               pointHoverBackgroundColor: '#06b6d4', // cyan-500
               pointHoverBorderColor: '#06b6d4',
-              tension: 0.4,
-              fill: true
+              tension: 0, // straight lines for a 2D look
+              fill: false
             }]
           },
           options: {
@@ -172,16 +172,31 @@ const HourlySparkline = memo(function HourlySparkline({
       const y = (1 - norm(d.temperature)) * 100;
       return `${x},${y}`;
     }).join(' ');
+    const currentHour = new Date().getHours();
+    const tickHours = [0, 6, 12, 18, 24];
     return (
       <div className={`space-y-2 ${className}`}>
         <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">
           {titleText || strings.hourlyTemperature || '24-Hour Temperature'}
         </h4>
-        <div className="relative h-20">
+        <div className="relative h-24">
           <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 w-full h-full">
-            <polyline fill="rgba(34,211,238,0.12)" stroke="none" points={`0,100 ${points} 100,100`} />
-            <polyline fill="none" stroke="#22d3ee" strokeWidth="1.5" points={points} />
+            <polyline fill="none" stroke="#22d3ee" strokeWidth="1.75" points={points} />
           </svg>
+          {/* X-axis labels at 0,6,12,18,24 hours ahead */}
+          <div className="absolute left-0 right-0 bottom-0 translate-y-6 text-[10px] text-slate-500 dark:text-slate-400">
+            <div className="relative h-0">
+              {tickHours.map((h, idx) => (
+                <span
+                  key={idx}
+                  className="absolute"
+                  style={{ left: `${(h/24)*100}%`, transform: 'translateX(-50%)' }}
+                >
+                  {`${(currentHour + h) % 24}:00`}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     );
