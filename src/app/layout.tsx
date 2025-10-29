@@ -38,6 +38,26 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        {/* Prevent theme flash: set html class before hydration */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var saved = localStorage.getItem('weatherflow-theme');
+                  var theme = (saved === 'light' || saved === 'dark')
+                    ? saved
+                    : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                  var root = document.documentElement;
+                  root.classList.remove('light','dark');
+                  root.classList.add(theme);
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body className={inter.className}>
         <ThemeProvider>
           <QueryProvider>
