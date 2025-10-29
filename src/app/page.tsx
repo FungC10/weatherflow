@@ -26,7 +26,7 @@ import dynamic from 'next/dynamic';
 const MapPanel = dynamic(() => import('@/components/MapPanel'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-64 bg-white/50 dark:bg-slate-800/50 rounded-2xl border border-slate-200/50 dark:border-slate-700/30 flex items-center justify-center backdrop-blur-sm">
+    <div className="w-full h-full min-h-[16rem] bg-white/50 dark:bg-slate-800/50 rounded-2xl border border-slate-200/50 dark:border-slate-700/30 flex items-center justify-center backdrop-blur-sm">
       <div className="text-center">
         <div className="animate-spin rounded-full h-8 w-8 border-2 border-cyan-400 border-t-transparent mx-auto mb-2"></div>
         <p className="text-slate-600 dark:text-slate-400 text-sm">Loading map...</p>

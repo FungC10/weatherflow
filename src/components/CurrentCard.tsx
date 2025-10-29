@@ -1,4 +1,4 @@
-import { memo, useState } from 'react';
+import { memo } from 'react';
 import { GeoPoint, Units, CurrentWeather, HourlyData } from '@/lib/types';
 import { formatTemp, formatWind, formatPressure, formatDate, getWindDirection } from '@/lib/format';
 import { useStrings } from '@/lib/LocaleContext';
@@ -21,7 +21,6 @@ interface CurrentCardProps {
 
 const CurrentCard = memo(function CurrentCard({ weather, location, units, isLoading = false, hourlyData }: CurrentCardProps) {
   const strings = useStrings();
-  const [showHourly, setShowHourly] = useState(false);
   if (isLoading) {
     return (
       <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
@@ -112,30 +111,14 @@ const CurrentCard = memo(function CurrentCard({ weather, location, units, isLoad
         </div>
       </div>
 
-      {/* Hourly Temperature Sparkline - Desktop Only, collapsible */}
+      {/* Hourly Temperature Sparkline - Desktop Only, always show when data exists */}
       {hourlyData && hourlyData.length > 0 && (
-        <div className="mt-4 md:mt-6 hidden md:block">
-          <button
-            type="button"
-            onClick={() => setShowHourly(v => !v)}
-            className="mb-3 inline-flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300 hover:text-cyan-600 dark:hover:text-cyan-300 transition-colors"
-            aria-expanded={showHourly}
-            aria-controls="hourly-sparkline"
-          >
-            <svg className={`w-4 h-4 transition-transform ${showHourly ? 'rotate-90' : ''}`} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-              <path fillRule="evenodd" d="M6 6a1 1 0 011.707-.707l5 5a1 1 0 010 1.414l-5 5A1 1 0 016 15.586L10.586 11 6 6.414A1 1 0 016 6z" clipRule="evenodd" />
-            </svg>
-            {showHourly ? 'Hide hourly trend' : 'Show hourly trend'}
-          </button>
-          {showHourly && (
-            <div id="hourly-sparkline">
-              <HourlySparkline 
-                hourlyData={hourlyData} 
-                units={units}
-                className="w-full"
-              />
-            </div>
-          )}
+        <div className="mt-4 md:mt-6 hidden md:block" id="hourly-sparkline">
+          <HourlySparkline 
+            hourlyData={hourlyData} 
+            units={units}
+            className="w-full"
+          />
         </div>
       )}
       
