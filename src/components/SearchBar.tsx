@@ -26,6 +26,7 @@ export default function SearchBar({
   const [recentSearches, setRecentSearches] = useState<GeoPoint[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
+  const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -100,11 +101,11 @@ export default function SearchBar({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [disabled]);
 
-  // Show suggestions when we have search results or recent searches
+  // Show suggestions when input is focused and we have data
   useEffect(() => {
     const hasResults = searchResults.length > 0 || recentSearches.length > 0;
-    setShowSuggestions(hasResults && (query.length > 0 || recentSearches.length > 0));
-  }, [searchResults, recentSearches, query]);
+    setShowSuggestions(isFocused && hasResults && (query.length > 0 || recentSearches.length > 0));
+  }, [searchResults, recentSearches, query, isFocused]);
 
   // Handle escape key to close dropdown
   useEffect(() => {
@@ -209,6 +210,7 @@ export default function SearchBar({
   }, []);
 
   const handleInputFocus = useCallback(() => {
+    setIsFocused(true);
     if (recentSearches.length > 0 || searchResults.length > 0) {
       setShowSuggestions(true);
     }
@@ -217,6 +219,7 @@ export default function SearchBar({
   const handleInputBlur = useCallback(() => {
     // Delay hiding to allow clicking on suggestions
     setTimeout(() => {
+      setIsFocused(false);
       setShowSuggestions(false);
       setFocusedIndex(-1);
     }, 150);
@@ -230,6 +233,28 @@ export default function SearchBar({
       clearTimeout(hideTimeoutRef.current);
       hideTimeoutRef.current = null;
     }
+  }, []);
+
+  // Close suggestions when clicking outside the input/dropdown
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as Node;
+      if (
+        inputRef.current && !inputRef.current.contains(target) &&
+        dropdownRef.current && !dropdownRef.current.contains(target)
+      ) {
+        setIsFocused(false);
+        setShowSuggestions(false);
+        setFocusedIndex(-1);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
   }, []);
 
 
