@@ -111,7 +111,7 @@ const CurrentCard = memo(function CurrentCard({ weather, location, units, isLoad
         </div>
       </div>
 
-      {/* Hourly Temperature Sparkline - Desktop Only */}
+      {/* Hourly Temperature Sparkline */}
       {(() => {
         const hasHourly = Array.isArray(hourlyData) && hourlyData.length > 0;
         // Generate deterministic fallback based on current conditions if no hourly
@@ -131,7 +131,7 @@ const CurrentCard = memo(function CurrentCard({ weather, location, units, isLoad
           return arr;
         })();
         return (
-          <div className="mt-4 md:mt-6 hidden md:block" id="hourly-sparkline">
+          <div className="mt-4 md:mt-6" id="hourly-sparkline">
             <HourlySparkline 
               hourlyData={dataToShow}
               units={units}
