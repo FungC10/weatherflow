@@ -161,10 +161,27 @@ const HourlySparkline = memo(function HourlySparkline({
   }
 
   if (!isLoaded) {
+    // Fallback lightweight SVG sparkline so users always see something even if Chart.js isn't ready
+    const next24 = hourlyData.slice(0, 24);
+    const temps = next24.map(d => d.temperature);
+    const min = Math.min(...temps);
+    const max = Math.max(...temps);
+    const norm = (t: number) => max === min ? 0.5 : (t - min) / (max - min);
+    const points = next24.map((d, i) => {
+      const x = (i / Math.max(1, next24.length - 1)) * 100;
+      const y = (1 - norm(d.temperature)) * 100;
+      return `${x},${y}`;
+    }).join(' ');
     return (
-      <div className={`text-center py-4 ${className}`}>
-        <div className="animate-pulse">
-          <div className="h-16 bg-slate-700/30 rounded-lg"></div>
+      <div className={`space-y-2 ${className}`}>
+        <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">
+          {titleText || strings.hourlyTemperature || '24-Hour Temperature'}
+        </h4>
+        <div className="relative h-20">
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 w-full h-full">
+            <polyline fill="rgba(34,211,238,0.12)" stroke="none" points={`0,100 ${points} 100,100`} />
+            <polyline fill="none" stroke="#22d3ee" strokeWidth="1.5" points={points} />
+          </svg>
         </div>
       </div>
     );
@@ -175,7 +192,7 @@ const HourlySparkline = memo(function HourlySparkline({
       <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">
         {titleText || strings.hourlyTemperature || '24-Hour Temperature'}
       </h4>
-      <div className="relative h-16">
+      <div className="relative h-24">
         <canvas
           ref={canvasRef}
           className="w-full h-full"
