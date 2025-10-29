@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 
-type Theme = 'light' | 'dark' | 'system';
+type Theme = 'light' | 'dark';
 
 interface ThemeContextType {
   theme: Theme;
@@ -17,39 +17,28 @@ interface ThemeProviderProps {
 }
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>('system');
+  const [theme, setTheme] = useState<Theme>('dark');
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('dark');
 
   useEffect(() => {
-    // Get saved theme from localStorage or default to system
-    const savedTheme = localStorage.getItem('weatherflow-theme') as Theme;
-    if (savedTheme && ['light', 'dark', 'system'].includes(savedTheme)) {
-      setTheme(savedTheme);
+    // Determine initial theme: use saved value if valid; otherwise detect system
+    const saved = localStorage.getItem('weatherflow-theme');
+    if (saved === 'light' || saved === 'dark') {
+      setTheme(saved);
+      setResolvedTheme(saved);
+      return;
     }
+
+    // Migrate legacy 'system' to detected default
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const detected: Theme = prefersDark ? 'dark' : 'light';
+    setTheme(detected);
+    setResolvedTheme(detected);
+    localStorage.setItem('weatherflow-theme', detected);
   }, []);
 
   useEffect(() => {
-    const updateResolvedTheme = () => {
-      if (theme === 'system') {
-        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-        setResolvedTheme(systemTheme);
-      } else {
-        setResolvedTheme(theme);
-      }
-    };
-
-    updateResolvedTheme();
-
-    // Listen for system theme changes
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = () => {
-      if (theme === 'system') {
-        updateResolvedTheme();
-      }
-    };
-
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
+    setResolvedTheme(theme);
   }, [theme]);
 
   useEffect(() => {
