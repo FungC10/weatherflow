@@ -281,8 +281,8 @@ export default function Home() {
           </div>
         </header>
 
-        {/* Favorites Bar */}
-        <div className="container mx-auto px-6 py-4">
+        {/* Favorites Bar - Always visible */}
+        <div className="container mx-auto px-6 py-4 bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm">
           <div className="max-w-6xl mx-auto">
             <FavoritesBar onCitySelect={handleCitySelect} />
           </div>
