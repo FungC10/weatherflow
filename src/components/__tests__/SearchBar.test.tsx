@@ -228,4 +228,48 @@ describe('SearchBar', () => {
       })
     )
   })
+
+  it('shows validation error when submitting empty form', async () => {
+    const user = userEvent.setup()
+    render(<SearchBar onCitySelect={mockOnCitySelect} />)
+    
+    const input = screen.getByRole('combobox', { name: /search for a city/i })
+    
+    // Try to submit empty form
+    await user.keyboard('{Enter}')
+    
+    // Check for error message
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toBeInTheDocument()
+      expect(screen.getByText(/please enter a city name/i)).toBeInTheDocument()
+    })
+    
+    // Error should be accessible
+    const errorMessage = screen.getByRole('alert')
+    expect(errorMessage).toHaveAttribute('aria-live', 'polite')
+    expect(errorMessage).toHaveAttribute('id', 'search-error')
+  })
+
+  it('clears validation error when user starts typing', async () => {
+    const user = userEvent.setup()
+    render(<SearchBar onCitySelect={mockOnCitySelect} />)
+    
+    const input = screen.getByRole('combobox', { name: /search for a city/i })
+    
+    // Submit empty form to trigger error
+    await user.keyboard('{Enter}')
+    
+    // Wait for error to appear
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toBeInTheDocument()
+    })
+    
+    // Start typing - error should clear
+    await user.type(input, 'l')
+    
+    // Error should disappear
+    await waitFor(() => {
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    })
+  })
 })

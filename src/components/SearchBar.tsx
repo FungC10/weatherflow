@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useForm } from 'react-hook-form';
 import { useQuery } from '@tanstack/react-query';
 import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { getRecentSearches, clearRecentSearches, addRecentSearch } from '@/lib/storage';
@@ -8,6 +9,10 @@ import { searchCity } from '@/lib/api';
 import { queryKeys } from '@/lib/queryKeys';
 import { GeoPoint } from '@/lib/types';
 import { useStrings } from '@/lib/LocaleContext';
+
+interface SearchFormData {
+  query: string;
+}
 
 interface SearchBarProps {
   onCitySelect: (city: GeoPoint) => void;
@@ -22,14 +27,32 @@ export default function SearchBar({
 }: SearchBarProps) {
   const strings = useStrings();
   const actualPlaceholder = placeholder || strings.searchPlaceholder;
-  const [query, setQuery] = useState('');
+  
+  // React Hook Form setup
+  const { 
+    register, 
+    handleSubmit, 
+    watch, 
+    setValue,
+    formState: { errors },
+    setError,
+    clearErrors
+  } = useForm<SearchFormData>({
+    defaultValues: {
+      query: ''
+    },
+    mode: 'onSubmit' // Only validate on submit
+  });
+
+  const query = watch('query');
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const [recentSearches, setRecentSearches] = useState<GeoPoint[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Debounced search query
   const [debouncedQuery, setDebouncedQuery] = useState('');
@@ -121,9 +144,23 @@ export default function SearchBar({
     return () => document.removeEventListener('keydown', handleEscape);
   }, [showSuggestions]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (query.trim() && searchResults.length > 0) {
+  const onSubmit = (data: SearchFormData) => {
+    const trimmedQuery = data.query.trim();
+    
+    // Validation: non-empty query
+    if (!trimmedQuery) {
+      setError('query', {
+        type: 'manual',
+        message: 'Please enter a city name to search'
+      });
+      return;
+    }
+    
+    // Clear any errors if validation passes
+    clearErrors('query');
+    
+    // If there are search results, select the first one
+    if (searchResults.length > 0) {
       // Select the first search result but keep suggestions visible
       handleCitySelect(searchResults[0], false);
     }
@@ -145,7 +182,7 @@ export default function SearchBar({
     onCitySelect(city);
     // Create a display name that includes country for better identification
     const displayName = city.country ? `${city.name}, ${city.country}` : city.name;
-    setQuery(displayName || city.lat?.toString() || 'Unknown Location');
+    setValue('query', displayName || city.lat?.toString() || 'Unknown Location');
     if (hideSuggestions) {
       setShowSuggestions(false);
       setFocusedIndex(-1);
@@ -155,7 +192,7 @@ export default function SearchBar({
     }
     // Save the city object to recent searches
     addRecentSearch(city);
-  }, [onCitySelect, scheduleHideSuggestions]);
+  }, [onCitySelect, scheduleHideSuggestions, setValue]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     const recentSearchOptions = recentSearches.map(city => ({ ...city, type: 'recent' as const }));
@@ -163,7 +200,8 @@ export default function SearchBar({
     
     if (!showSuggestions || allOptions.length === 0) {
       if (e.key === 'Enter') {
-        handleSubmit(e);
+        // Let RHF handle form submit
+        handleSubmit(onSubmit)(e);
       }
       return;
     }
@@ -192,7 +230,8 @@ export default function SearchBar({
             handleCitySelect(selected as GeoPoint, false);
           }
         } else {
-          handleSubmit(e);
+          // Let RHF handle form submit
+          handleSubmit(onSubmit)(e);
         }
         break;
       case 'Escape':
@@ -225,15 +264,26 @@ export default function SearchBar({
     }, 150);
   }, []);
 
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setQuery(e.target.value);
-    setFocusedIndex(-1);
-    // Cancel any pending hide timeout when user types
-    if (hideTimeoutRef.current) {
-      clearTimeout(hideTimeoutRef.current);
-      hideTimeoutRef.current = null;
+  // Register input with React Hook Form
+  // Note: Validation is handled manually in onSubmit to only show errors on submit
+  const { ref, onChange, ...inputProps } = register('query', {
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+      // Clear errors when user starts typing
+      clearErrors('query');
+      setFocusedIndex(-1);
+      // Cancel any pending hide timeout when user types
+      if (hideTimeoutRef.current) {
+        clearTimeout(hideTimeoutRef.current);
+        hideTimeoutRef.current = null;
+      }
     }
-  }, []);
+  });
+
+  // Merge refs for input
+  const mergedInputRef = useCallback((node: HTMLInputElement | null) => {
+    inputRef.current = node;
+    ref(node);
+  }, [ref]);
 
   // Close suggestions when clicking outside the input/dropdown
   useEffect(() => {
@@ -260,16 +310,24 @@ export default function SearchBar({
 
   return (
     <div className="w-full max-w-md mx-auto relative">
-      <form onSubmit={handleSubmit} role="search" aria-label="Search for weather">
+      <form onSubmit={handleSubmit(onSubmit)} role="search" aria-label="Search for weather">
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <MagnifyingGlassIcon className="h-5 w-5 text-slate-400" aria-hidden="true" />
           </div>
           <input
-            ref={inputRef}
+            {...inputProps}
+            ref={mergedInputRef}
             type="text"
-            value={query}
-            onChange={handleInputChange}
+            onChange={(e) => {
+              onChange(e);
+              setFocusedIndex(-1);
+              // Cancel any pending hide timeout when user types
+              if (hideTimeoutRef.current) {
+                clearTimeout(hideTimeoutRef.current);
+                hideTimeoutRef.current = null;
+              }
+            }}
             onKeyDown={handleKeyDown}
             onFocus={handleInputFocus}
             onBlur={handleInputBlur}
@@ -277,13 +335,28 @@ export default function SearchBar({
             disabled={disabled}
             autoComplete="off"
             aria-label={strings.searchLabel}
-            aria-describedby="search-help"
-                    aria-expanded={showSuggestions}
-                    aria-haspopup="listbox"
-                    role="combobox"
-            className="block w-full pl-10 pr-3 py-3 border border-slate-300 dark:border-slate-600 rounded-2xl bg-white/80 dark:bg-slate-800/50 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 backdrop-blur-sm shadow-sm hover:shadow-md focus:shadow-lg"
+            aria-describedby={errors.query ? "search-error search-help" : "search-help"}
+            aria-expanded={showSuggestions}
+            aria-haspopup="listbox"
+            aria-invalid={errors.query ? "true" : "false"}
+            role="combobox"
+            className={`block w-full pl-10 pr-3 py-3 border rounded-2xl bg-white/80 dark:bg-slate-800/50 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 backdrop-blur-sm shadow-sm hover:shadow-md focus:shadow-lg ${
+              errors.query 
+                ? 'border-red-300 dark:border-red-500/50 focus:ring-red-400' 
+                : 'border-slate-300 dark:border-slate-600'
+            }`}
           />
         </div>
+        {errors.query && (
+          <div 
+            id="search-error"
+            className="mt-1 ml-3 text-xs text-red-600 dark:text-red-400"
+            role="alert"
+            aria-live="polite"
+          >
+            {errors.query.message || 'Please enter a city name to search'}
+          </div>
+        )}
         <div id="search-help" className="sr-only">
           Press / to focus search, use arrow keys to navigate recent searches, Enter to select
         </div>
