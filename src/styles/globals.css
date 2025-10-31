@@ -169,3 +169,22 @@ a:focus {
   color: var(--background);
   text-decoration: underline;
 }
+
+/* Leaflet popup link styling */
+.leaflet-popup-content a {
+  color: rgb(8 145 178) !important; /* cyan-600 */
+  text-decoration: underline !important;
+  cursor: pointer;
+}
+
+.leaflet-popup-content a:hover {
+  color: rgb(14 116 144) !important; /* cyan-700 */
+}
+
+.dark .leaflet-popup-content a {
+  color: rgb(103 232 249) !important; /* cyan-400 */
+}
+
+.dark .leaflet-popup-content a:hover {
+  color: rgb(165 243 252) !important; /* cyan-300 */
+}
