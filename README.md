@@ -13,27 +13,33 @@ A modern, feature-rich weather application built with Next.js 15, TypeScript, an
 
 ### 🔍 **Search & Discovery**
 - **Smart Search**: Debounced city search with instant suggestions
+- **Form Validation**: React Hook Form integration with inline error messages
 - **Recent Searches**: Quick access to previously searched cities (stores full location data)
 - **Favorites System**: Pin up to 8 favorite cities for instant access
 - **Favorite City Cards**: View weather for all favorites at once on the main page
 - **Favorite Quick Access**: Small chips bar for switching favorites when viewing weather
 - **Keyboard Navigation**: Full arrow key navigation and Enter to select
 - **Geolocation**: Use your current location with permission handling
+- **Your Location Card**: Persistent location card on home page after successful geolocation
 
 ### 🗺️ **Interactive Features**
 - **Collapsible Map**: Interactive map with city markers and weather popups
+- **Map Navigation**: "View details" link in map popups to navigate to city detail pages
 - **Deep Linking**: Shareable URLs with city coordinates and units
+- **Share Button**: Copy shareable links with clipboard fallback and URL display
 - **Offline Support**: Cached weather data when offline
 - **PWA Ready**: Installable as a mobile app with service worker
 
 ### 🎨 **User Experience**
 - **Light/Dark Mode**: Beautiful theme toggle with system preference detection
 - **Glass-morphism Design**: Modern UI with backdrop blur effects and gradient accents
+- **Micro-animations**: Subtle entrance animations for cards and forecast items (respects reduced motion)
 - **Responsive Design**: Perfect on desktop, tablet, and mobile
 - **Accessibility**: WCAG AA compliant with screen reader support
 - **Animations**: Smooth transitions and hover effects (respects reduced motion)
 - **Loading States**: Elegant loading animations and error handling
 - **Clean Interface**: Simplified toggles and intuitive layout
+- **Navigation**: Clickable logo to return home without focusing search
 
 ### ⚡ **Performance**
 - **Instant Unit Toggle**: Client-side conversion (no API calls)
@@ -49,11 +55,13 @@ A modern, feature-rich weather application built with Next.js 15, TypeScript, an
 - **Data Fetching**: TanStack Query (React Query)
 - **Maps**: Leaflet + React-Leaflet
 - **Charts**: Chart.js (dynamic import with SVG fallback)
+- **Animations**: Framer Motion
+- **Forms**: React Hook Form
 - **Icons**: Heroicons
 - **Testing**: Vitest + React Testing Library
 - **PWA**: Service Worker + Manifest
 - **State Management**: React Context (Theme, Locale)
-- **Storage**: LocalStorage for favorites, recent searches, and theme
+- **Storage**: LocalStorage for favorites, recent searches, theme, units, and last geolocation
 
 ## 🚀 Getting Started
 
@@ -244,11 +252,13 @@ This app supports multiple weather providers:
 
 ### Search Experience
 - **Debounced Search**: 300ms delay to prevent excessive API calls
+- **Form Validation**: React Hook Form with inline error messages for empty submissions
 - **Smart Suggestions**: Recent searches + API results
 - **Click Outside to Close**: Suggestions close when clicking outside search bar
 - **Full Location Data**: Recent searches store complete GeoPoint data (lat, lon, name, country)
 - **Keyboard First**: Full arrow key navigation
 - **Persistent UI**: Suggestions stay visible after Enter (2s delay)
+- **Accessibility**: Proper ARIA attributes and error announcements
 
 ### Theme & UI
 - **System Preference Detection**: Automatically detects and applies user's preferred theme
@@ -257,6 +267,7 @@ This app supports multiple weather providers:
 - **Simplified Controls**: Clean toggle buttons without unnecessary indicators
 - **Responsive Cards**: Weather cards adapt to screen size
 - **Loading Placeholders**: Full-size loading states matching actual content layout
+- **Micro-entrance Animations**: Subtle fade-in and slide-up animations for CurrentCard and ForecastItem (180ms, respects prefers-reduced-motion)
 
 ### Offline Support
 - **Service Worker**: Caches static assets and weather data
@@ -268,8 +279,9 @@ This app supports multiple weather providers:
 - **WCAG AA Compliance**: Proper contrast ratios and focus management
 - **Screen Reader Support**: Comprehensive ARIA labels and descriptions
 - **Keyboard Navigation**: Full keyboard accessibility
-- **Reduced Motion**: Respects user motion preferences
+- **Reduced Motion**: Respects user motion preferences (prefers-reduced-motion media query)
 - **Focus Management**: Proper focus handling on route changes
+- **Form Validation**: Accessible error messages with ARIA attributes
 
 ## 📱 PWA Features
 
@@ -293,12 +305,14 @@ src/
 ```
 
 ### Key Components
-- **SearchBar**: Smart search with suggestions, recent searches, and keyboard navigation
-- **CurrentCard**: Weather display with favorites button and hourly prediction chart
+- **SearchBar**: Smart search with React Hook Form validation, suggestions, recent searches, and keyboard navigation
+- **CurrentCard**: Weather display with favorites button, hourly prediction chart, and micro-entrance animation
 - **ForecastList**: 5-day forecast with weather icons and conditions
-- **MapPanel**: Interactive map with city markers and weather popups
+- **ForecastItem**: Individual forecast items with subtle stagger animations
+- **MapPanel**: Interactive map with city markers, weather popups, and "View details" links
 - **FavoriteCitiesCards**: Grid display of favorite cities with current weather on main page
 - **FavoritesBar**: Compact chips bar for quick favorite switching (shown only when viewing weather)
+- **YourLocationCard**: Persistent location card displayed after successful geolocation
 - **ThemeToggle**: Light/dark mode toggle with system preference detection
 - **UnitToggle**: Simple Celsius/Fahrenheit toggle button
 
@@ -339,3 +353,5 @@ This project is licensed under the ISC License.
 - [Chart.js](https://www.chartjs.org/) for data visualization
 - [Leaflet](https://leafletjs.com/) for interactive maps
 - [Heroicons](https://heroicons.com/) for beautiful icons
+- [Framer Motion](https://www.framer.com/motion/) for smooth animations
+- [React Hook Form](https://react-hook-form.com/) for form management
