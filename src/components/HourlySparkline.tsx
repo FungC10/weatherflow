@@ -70,6 +70,11 @@ const HourlySparkline = memo(function HourlySparkline({
           options: {
             responsive: true,
             maintainAspectRatio: false,
+            layout: {
+              padding: {
+                bottom: 10 // reduced padding to move labels up
+              }
+            },
             interaction: {
               intersect: false,
               mode: 'index'
@@ -184,7 +189,7 @@ const HourlySparkline = memo(function HourlySparkline({
             <polyline fill="none" stroke="#22d3ee" strokeWidth="1.75" points={points} />
           </svg>
           {/* X-axis labels at 0,6,12,18,24 hours ahead */}
-          <div className="absolute left-0 right-0 bottom-0 translate-y-6 text-[10px] text-slate-500 dark:text-slate-400">
+          <div className="absolute left-0 right-0 bottom-0 translate-y-2 text-[10px] text-slate-500 dark:text-slate-400">
             <div className="relative h-0">
               {tickHours.map((h, idx) => (
                 <span
