@@ -70,10 +70,28 @@ export async function askLocation(): Promise<GeoLocation> {
   });
 }
 
+/**
+ * Check the current geolocation permission state
+ * @returns Promise resolving to permission state: 'granted', 'denied', or 'prompt'
+ */
+export async function checkLocationPermission(): Promise<'granted' | 'denied' | 'prompt' | 'unknown'> {
+  if (typeof navigator === 'undefined' || !navigator.permissions) {
+    return 'unknown';
+  }
+
+  try {
+    const result = await navigator.permissions.query({ name: 'geolocation' as PermissionName });
+    return result.state as 'granted' | 'denied' | 'prompt';
+  } catch (error) {
+    // Permissions API might not be fully supported
+    return 'unknown';
+  }
+}
+
 export function getLocationErrorMessage(error: GeoLocationError): string {
   switch (error.type) {
     case 'permission_denied':
-      return 'Location access denied. Click "Use my location" again to allow access, or enable location in your browser settings.';
+      return 'Location access denied. Click "Use my location" again - the browser may show a permission prompt. If not, enable location in your browser settings.';
     case 'position_unavailable':
       return 'Unable to determine your location. Please try again or search manually.';
     case 'timeout':

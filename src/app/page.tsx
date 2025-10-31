@@ -11,7 +11,7 @@ import LoadingShimmer from '@/components/LoadingShimmer';
 import { Units, GeoPoint, CurrentWeather, Forecast } from '@/lib/types';
 import { getCurrent, getForecast } from '@/lib/api';
 import { queryKeys } from '@/lib/queryKeys';
-import { askLocation, getLocationErrorMessage, GeoLocationError } from '@/lib/geo';
+import { askLocation, getLocationErrorMessage, GeoLocationError, checkLocationPermission } from '@/lib/geo';
 import { addRecentSearch, getLastGeo, setLastGeo } from '@/lib/storage';
 import ShareButton from '@/components/ShareButton';
 import OfflineIndicator from '@/components/OfflineIndicator';
@@ -61,6 +61,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [locationError, setLocationError] = useState<string | null>(null);
   const [isRequestingLocation, setIsRequestingLocation] = useState(false);
+  const [permissionState, setPermissionState] = useState<'granted' | 'denied' | 'prompt' | 'unknown'>('unknown');
   const [showMap, setShowMap] = useState(false);
   const [isMapLoading, setIsMapLoading] = useState(false);
   const [favoritesCount, setFavoritesCount] = useState(0);
@@ -76,6 +77,9 @@ export default function Home() {
     if (savedGeo) {
       setLastGeoState(savedGeo);
     }
+
+    // Check permission state on mount
+    checkLocationPermission().then(setPermissionState);
   }, []);
 
   // Fetch current weather when city is selected (always in metric for consistency)
@@ -176,6 +180,7 @@ export default function Home() {
     setIsRequestingLocation(true);
     setLocationError(null);
     
+    // Clear any previous errors when trying again
     try {
       const location = await askLocation();
       const locationCity: GeoPoint = {
@@ -206,6 +211,10 @@ export default function Home() {
     } catch (error) {
       const geoError = error as GeoLocationError;
       setLocationError(getLocationErrorMessage(geoError));
+      
+      // Update permission state after error
+      const currentState = await checkLocationPermission();
+      setPermissionState(currentState);
     } finally {
       setIsRequestingLocation(false);
     }
@@ -311,12 +320,35 @@ export default function Home() {
                   <p className="mb-2">{locationError}</p>
                   {locationError.includes('permission') && (
                     <div className="mt-2 pt-2 border-t border-red-200 dark:border-red-500/30 text-xs">
-                      <p className="mb-1 font-medium">To enable location:</p>
-                      <ul className="text-left space-y-1 list-disc list-inside opacity-90">
-                        <li>Click the lock icon (🔒) in your browser's address bar</li>
-                        <li>Find "Location" and change it to "Allow"</li>
-                        <li>Or try clicking "Use my location" again</li>
-                      </ul>
+                      {permissionState === 'prompt' && (
+                        <p className="mb-2 p-2 bg-blue-50 dark:bg-blue-500/10 rounded text-blue-700 dark:text-blue-300">
+          ✅ Permission prompt available! Click "Use my location" again to see the permission dialog.
+                        </p>
+                      )}
+                      {permissionState === 'denied' && (
+                        <div className="space-y-2 text-left">
+                          <p className="font-semibold mb-1">Location is blocked. To enable:</p>
+                          <ul className="space-y-1 list-disc list-inside opacity-90 ml-2">
+                            <li>Look for the lock icon (🔒) or site settings icon in your browser's address bar</li>
+                            <li>Click it to open site settings</li>
+                            <li>Find "Location" in the permissions list</li>
+                            <li>Change it from "Block" to "Allow"</li>
+                            <li>Refresh this page and click "Use my location" again</li>
+                          </ul>
+                        </div>
+                      )}
+                      {permissionState === 'unknown' && (
+                        <div className="space-y-2 text-left">
+                          <p className="font-semibold">Try clicking "Use my location" again</p>
+                          <p className="opacity-90">The browser should show a permission prompt if available.</p>
+                          <p className="font-semibold mt-2">If no prompt appears, enable in browser settings:</p>
+                          <ul className="space-y-1 list-disc list-inside opacity-90 ml-2">
+                            <li>Look for the lock icon (🔒) in the address bar</li>
+                            <li>Find "Location" permissions and change to "Allow"</li>
+                            <li>Refresh and try again</li>
+                          </ul>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
