@@ -1,6 +1,7 @@
-import { memo } from 'react';
+import { memo, useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import { GeoPoint, Units, CurrentWeather, HourlyData } from '@/lib/types';
-import { formatTemp, formatWind, formatPressure, formatDate, getWindDirection } from '@/lib/format';
+import { formatTemp, formatWind, formatPressure, formatDate, getWindDirection, prefersReducedMotion } from '@/lib/format';
 import { useStrings } from '@/lib/LocaleContext';
 import dynamic from 'next/dynamic';
 import FavoriteButton from './FavoriteButton';
@@ -21,6 +22,16 @@ interface CurrentCardProps {
 
 const CurrentCard = memo(function CurrentCard({ weather, location, units, isLoading = false, hourlyData }: CurrentCardProps) {
   const strings = useStrings();
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  useEffect(() => {
+    setReducedMotion(prefersReducedMotion());
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const handleChange = () => setReducedMotion(mediaQuery.matches);
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
+
   if (isLoading) {
     return (
       <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
@@ -58,7 +69,16 @@ const CurrentCard = memo(function CurrentCard({ weather, location, units, isLoad
   const description = weather.weather[0]?.description || 'Unknown';
 
   return (
-    <div className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl rounded-3xl p-6 md:p-8 border border-slate-200/50 dark:border-slate-700/50 shadow-xl h-full flex flex-col" role="region" aria-labelledby="current-weather-title">
+    <motion.div 
+      className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl rounded-3xl p-6 md:p-8 border border-slate-200/50 dark:border-slate-700/50 shadow-xl h-full flex flex-col" 
+      role="region" 
+      aria-labelledby="current-weather-title"
+      {...(reducedMotion ? {} : {
+        initial: { opacity: 0, y: 4 },
+        animate: { opacity: 1, y: 0 },
+        transition: { duration: 0.18 }
+      })}
+    >
       <div className="flex items-start justify-between gap-4 mb-4">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 flex-wrap">
@@ -144,7 +164,7 @@ const CurrentCard = memo(function CurrentCard({ weather, location, units, isLoad
       
       {/* Spacer to push content if needed */}
       <div className="mt-auto" />
-    </div>
+    </motion.div>
   );
 });
 

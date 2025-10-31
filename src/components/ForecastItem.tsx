@@ -1,6 +1,7 @@
-import { memo } from 'react';
+import { memo, useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import { Units, DailyForecast } from '@/lib/types';
-import { formatTemp } from '@/lib/format';
+import { formatTemp, prefersReducedMotion } from '@/lib/format';
 import { getOpenMeteoWeatherIcon, getVariedWeatherEmoji, getVariedWeatherDescription, isOpenMeteoDayTime } from '@/lib/weatherIconOpenMeteo';
 import { useStrings } from '@/lib/LocaleContext';
 
@@ -8,10 +9,21 @@ interface ForecastItemProps {
   forecast: DailyForecast;
   units: Units;
   isToday?: boolean;
+  index?: number; // For stagger animation
 }
 
-const ForecastItem = memo(function ForecastItem({ forecast, units, isToday = false }: ForecastItemProps) {
+const ForecastItem = memo(function ForecastItem({ forecast, units, isToday = false, index = 0 }: ForecastItemProps) {
   const strings = useStrings();
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  useEffect(() => {
+    setReducedMotion(prefersReducedMotion());
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const handleChange = () => setReducedMotion(mediaQuery.matches);
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
+
   const dayName = isToday 
     ? strings.today 
     : new Date(forecast.dt * 1000).toLocaleDateString('en-US', { weekday: 'short' });
@@ -26,10 +38,18 @@ const ForecastItem = memo(function ForecastItem({ forecast, units, isToday = fal
   const description = weather ? getVariedWeatherDescription(weather.id, forecast.dt) : 'Unknown conditions';
 
   return (
-    <div 
+    <motion.div 
       className="bg-slate-50/60 dark:bg-white/5 backdrop-blur-sm rounded-lg p-4 border border-slate-200/60 dark:border-slate-700/30 hover:bg-slate-100/60 dark:hover:bg-white/10 transition-all duration-200 hover:shadow-lg"
       role="listitem"
       aria-label={`${dayName} forecast: ${description}, high ${maxTemp}, low ${minTemp}`}
+      {...(reducedMotion ? {} : {
+        initial: { opacity: 0, y: 4 },
+        animate: { opacity: 1, y: 0 },
+        transition: { 
+          duration: 0.18,
+          delay: index * 0.04 // Subtle stagger: 40ms per item
+        }
+      })}
     >
       <div className="flex items-center justify-between">
         <div className="flex-1 flex items-center space-x-4">
@@ -52,7 +72,7 @@ const ForecastItem = memo(function ForecastItem({ forecast, units, isToday = fal
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 });
 

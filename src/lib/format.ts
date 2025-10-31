@@ -63,3 +63,14 @@ export function slugify(name: string): string {
     .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
     .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
 }
+
+/**
+ * Check if user prefers reduced motion
+ * @returns boolean indicating if reduced motion is preferred
+ */
+export function prefersReducedMotion(): boolean {
+  if (typeof window === 'undefined') {
+    return false; // SSR: assume motion is fine
+  }
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}

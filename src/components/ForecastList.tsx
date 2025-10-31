@@ -1,7 +1,6 @@
 import { memo, useMemo } from 'react';
 import { Units, DailyForecast } from '@/lib/types';
 import ForecastItem from './ForecastItem';
-import { motion } from 'framer-motion';
 import { useStrings } from '@/lib/LocaleContext';
 
 interface ForecastListProps {
@@ -54,48 +53,25 @@ const ForecastList = memo(function ForecastList({ forecasts, units, isLoading = 
     return emptyState;
   }
 
-  // Memoize the animation variants to prevent re-creation
-  const containerVariants = useMemo(() => ({
-    initial: { opacity: 0 },
-    animate: { opacity: 1 },
-    transition: { duration: 0.3 }
-  }), []);
-
-  const itemVariants = useMemo(() => ({
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    transition: (index: number) => ({ 
-      duration: 0.3, 
-      delay: index * 0.1,
-      ease: "easeOut" as const
-    })
-  }), []);
-
   return (
     <div className="space-y-3">
       <h3 id="forecast-heading" className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-4">{strings.forecastTitle}</h3>
-      <motion.div 
+      <div 
         className="space-y-2"
         role="list"
         aria-labelledby="forecast-heading"
         aria-label={strings.forecastList}
-        {...containerVariants}
       >
         {forecasts.slice(0, 5).map((forecast, index) => (
-          <motion.div
+          <ForecastItem
             key={forecast.dt}
-            initial={itemVariants.initial}
-            animate={itemVariants.animate}
-            transition={itemVariants.transition(index)}
-          >
-            <ForecastItem
-              forecast={forecast}
-              units={units}
-              isToday={index === 0}
-            />
-          </motion.div>
+            forecast={forecast}
+            units={units}
+            isToday={index === 0}
+            index={index}
+          />
         ))}
-      </motion.div>
+      </div>
     </div>
   );
 });
