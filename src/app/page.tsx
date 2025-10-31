@@ -16,6 +16,7 @@ import { addRecentSearch } from '@/lib/storage';
 import ShareButton from '@/components/ShareButton';
 import OfflineIndicator from '@/components/OfflineIndicator';
 import FavoritesBar from '@/components/FavoritesBar';
+import FavoriteCitiesCards from '@/components/FavoriteCitiesCards';
 import { useStrings } from '@/lib/LocaleContext';
 import { convertCurrentWeather, convertForecast } from '@/lib/unitConversion';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -293,17 +294,23 @@ export default function Home() {
           <div className="max-w-6xl mx-auto">
             {/* Empty State - only show when no city is selected */}
             {!selectedCity && (
-              <div className="flex items-center justify-center min-h-[60vh]">
-                <EmptyState 
-                  action={{
-                    label: strings.searchForCity,
-                    onClick: () => {
-                      if (typeof window !== 'undefined') {
-                        document.querySelector('input')?.focus();
+              <div className="space-y-8">
+                {/* Favorite Cities Weather Cards */}
+                <FavoriteCitiesCards units={units} onCitySelect={handleCitySelect} />
+                
+                {/* Empty State - only show if no favorites */}
+                <div className="flex items-center justify-center min-h-[40vh]">
+                  <EmptyState 
+                    action={{
+                      label: strings.searchForCity,
+                      onClick: () => {
+                        if (typeof window !== 'undefined') {
+                          document.querySelector('input')?.focus();
+                        }
                       }
-                    }
-                  }}
-                />
+                    }}
+                  />
+                </div>
               </div>
             )}
 
