@@ -46,12 +46,15 @@ const UnitToggle = memo(function UnitToggle({ onChange, disabled = false }: Unit
           } inline-block h-8 w-8 transform rounded-xl bg-gradient-to-r from-cyan-400 to-blue-400 transition-transform duration-300 shadow-lg`}
           aria-hidden="true"
         />
-        <span className="absolute inset-0 flex items-center justify-center text-xs font-medium text-slate-600 dark:text-slate-300" aria-hidden="true">
-          <span className={`${units === 'metric' ? 'opacity-100' : 'opacity-0'} transition-opacity duration-200`}>
-            °C
+        {/* Text labels positioned to match toggle positions */}
+        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-600 dark:text-slate-300 transition-opacity duration-200" aria-hidden="true">
+          <span className={`${units === 'metric' ? 'opacity-100' : 'opacity-40'}`}>
+            C
           </span>
-          <span className={`${units === 'imperial' ? 'opacity-100' : 'opacity-0'} transition-opacity duration-200`}>
-            °F
+        </span>
+        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-600 dark:text-slate-300 transition-opacity duration-200" aria-hidden="true">
+          <span className={`${units === 'imperial' ? 'opacity-100' : 'opacity-40'}`}>
+            F
           </span>
         </span>
       </button>
