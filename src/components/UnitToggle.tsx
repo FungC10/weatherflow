@@ -34,28 +34,14 @@ const UnitToggle = memo(function UnitToggle({ onChange, disabled = false }: Unit
       <button
         onClick={handleToggle}
         disabled={disabled}
-        className="relative inline-flex h-10 w-20 items-center rounded-2xl bg-slate-200 dark:bg-slate-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-300 dark:hover:bg-slate-600 hover:shadow-lg active:scale-95"
+        className="group relative flex items-center justify-center w-12 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 active:scale-95"
         role="switch"
         aria-checked={units === 'imperial'}
         aria-labelledby="units-label"
         aria-describedby="units-description"
       >
-        <span
-          className={`${
-            units === 'imperial' ? 'translate-x-9' : 'translate-x-1'
-          } inline-block h-8 w-8 transform rounded-xl bg-gradient-to-r from-cyan-400 to-blue-400 transition-transform duration-300 shadow-lg`}
-          aria-hidden="true"
-        />
-        {/* Text labels positioned to match toggle positions */}
-        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-600 dark:text-slate-300 transition-opacity duration-200" aria-hidden="true">
-          <span className={`${units === 'metric' ? 'opacity-100' : 'opacity-40'}`}>
-            C
-          </span>
-        </span>
-        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-600 dark:text-slate-300 transition-opacity duration-200" aria-hidden="true">
-          <span className={`${units === 'imperial' ? 'opacity-100' : 'opacity-40'}`}>
-            F
-          </span>
+        <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+          {units === 'metric' ? '°C' : '°F'}
         </span>
       </button>
       <div id="units-description" className="sr-only">
