@@ -180,7 +180,8 @@ export default function Home() {
     setIsRequestingLocation(true);
     setLocationError(null);
     
-    // Clear any previous errors when trying again
+    // Always try to request location - the browser will show prompt if possible
+    // We can't force it to show, but we should always attempt
     try {
       const location = await askLocation();
       const locationCity: GeoPoint = {
