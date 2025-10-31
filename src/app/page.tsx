@@ -12,11 +12,12 @@ import { Units, GeoPoint, CurrentWeather, Forecast } from '@/lib/types';
 import { getCurrent, getForecast } from '@/lib/api';
 import { queryKeys } from '@/lib/queryKeys';
 import { askLocation, getLocationErrorMessage, GeoLocationError } from '@/lib/geo';
-import { addRecentSearch } from '@/lib/storage';
+import { addRecentSearch, getLastGeo, setLastGeo } from '@/lib/storage';
 import ShareButton from '@/components/ShareButton';
 import OfflineIndicator from '@/components/OfflineIndicator';
 import FavoritesBar from '@/components/FavoritesBar';
 import FavoriteCitiesCards from '@/components/FavoriteCitiesCards';
+import YourLocationCard from '@/components/YourLocationCard';
 import { useStrings } from '@/lib/LocaleContext';
 import { convertCurrentWeather, convertForecast } from '@/lib/unitConversion';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -63,10 +64,19 @@ export default function Home() {
   const [showMap, setShowMap] = useState(false);
   const [isMapLoading, setIsMapLoading] = useState(false);
   const [favoritesCount, setFavoritesCount] = useState(0);
+  const [lastGeo, setLastGeoState] = useState<{ lat: number; lon: number; label: string; updatedAt: string } | null>(null);
   const [originalCurrentWeather, setOriginalCurrentWeather] = useState<CurrentWeather | null>(null);
   const [originalForecast, setOriginalForecast] = useState<Forecast | null>(null);
   const [originalUnits, setOriginalUnits] = useState<Units>('metric');
   const queryClient = useQueryClient();
+
+  // Load last geolocation on mount
+  useEffect(() => {
+    const savedGeo = getLastGeo();
+    if (savedGeo) {
+      setLastGeoState(savedGeo);
+    }
+  }, []);
 
   // Fetch current weather when city is selected (always in metric for consistency)
   const { 
@@ -174,6 +184,18 @@ export default function Home() {
         name: location.name || 'Current Location',
         country: location.country
       };
+      
+      // Save location for persistence
+      const locationLabel = locationCity.country 
+        ? `${locationCity.name}, ${locationCity.country}`
+        : locationCity.name || 'Current Location';
+      setLastGeo(location.lat, location.lon, locationLabel);
+      setLastGeoState({
+        lat: location.lat,
+        lon: location.lon,
+        label: locationLabel,
+        updatedAt: new Date().toISOString(),
+      });
       
       setSelectedCity(locationCity);
       setSearchQuery(locationCity.name || 'Current Location');
@@ -308,6 +330,25 @@ export default function Home() {
             {/* Empty State - only show when no city is selected */}
             {!selectedCity && (
               <div className="space-y-8">
+                {/* Your Location Card - show if saved */}
+                {lastGeo && (
+                  <YourLocationCard
+                    lastGeo={lastGeo}
+                    units={units}
+                    onLocationSelect={(location) => {
+                      handleCitySelect({
+                        lat: location.lat,
+                        lon: location.lon,
+                        name: location.name,
+                        country: location.country,
+                      });
+                    }}
+                    onRefresh={(updatedGeo) => {
+                      setLastGeoState(updatedGeo);
+                    }}
+                  />
+                )}
+
                 {/* Favorite Cities Weather Cards */}
                 <FavoriteCitiesCards 
                   units={units} 

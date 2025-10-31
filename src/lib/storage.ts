@@ -236,3 +236,46 @@ export function clearFavorites(): void {
     // Silently fail
   }
 }
+
+// Last geolocation storage
+export interface LastGeo {
+  lat: number;
+  lon: number;
+  label: string;
+  updatedAt: string;
+}
+
+const LAST_GEO_KEY = 'weatherflow:lastGeo';
+
+export function getLastGeo(): LastGeo | null {
+  try {
+    if (typeof window === 'undefined') return null;
+    return getJSON<LastGeo>(LAST_GEO_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function setLastGeo(lat: number, lon: number, label: string): void {
+  try {
+    if (typeof window === 'undefined') return;
+    const lastGeo: LastGeo = {
+      lat,
+      lon,
+      label,
+      updatedAt: new Date().toISOString(),
+    };
+    setJSON(LAST_GEO_KEY, lastGeo);
+  } catch {
+    // Silently fail
+  }
+}
+
+export function clearLastGeo(): void {
+  try {
+    if (typeof window === 'undefined') return;
+    removeKey(LAST_GEO_KEY);
+  } catch {
+    // Silently fail
+  }
+}
