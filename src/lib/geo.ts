@@ -73,7 +73,7 @@ export async function askLocation(): Promise<GeoLocation> {
 export function getLocationErrorMessage(error: GeoLocationError): string {
   switch (error.type) {
     case 'permission_denied':
-      return 'Location access denied. Please enable location permissions and try again.';
+      return 'Location access denied. Click "Use my location" again to allow access, or enable location in your browser settings.';
     case 'position_unavailable':
       return 'Unable to determine your location. Please try again or search manually.';
     case 'timeout':

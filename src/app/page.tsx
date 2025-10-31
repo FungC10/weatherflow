@@ -308,7 +308,17 @@ export default function Home() {
             {locationError && (
               <div className="mt-4 flex justify-center">
                 <div className="px-4 py-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-2xl text-red-700 dark:text-red-300 text-sm text-center max-w-md shadow-sm">
-                  {locationError}
+                  <p className="mb-2">{locationError}</p>
+                  {locationError.includes('permission') && (
+                    <div className="mt-2 pt-2 border-t border-red-200 dark:border-red-500/30 text-xs">
+                      <p className="mb-1 font-medium">To enable location:</p>
+                      <ul className="text-left space-y-1 list-disc list-inside opacity-90">
+                        <li>Click the lock icon (🔒) in your browser's address bar</li>
+                        <li>Find "Location" and change it to "Allow"</li>
+                        <li>Or try clicking "Use my location" again</li>
+                      </ul>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
