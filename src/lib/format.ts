@@ -48,3 +48,18 @@ export function getWindDirection(degrees: number): string {
   const index = Math.round(normalizedDegrees / 22.5) % 16;
   return directions[index];
 }
+
+/**
+ * Convert a string to a URL-friendly slug
+ * @param name - The string to convert
+ * @returns URL-friendly slug (lowercase, trimmed, spaces/invalid chars replaced with '-')
+ */
+export function slugify(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '') // Remove invalid characters
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+    .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+}

@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import Link from 'next/link';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { Icon } from 'leaflet';
 import { GeoPoint, CurrentWeather, Units } from '@/lib/types';
-import { formatTemp } from '@/lib/format';
+import { formatTemp, slugify } from '@/lib/format';
 import 'leaflet/dist/leaflet.css';
 
 // Fix for default markers in react-leaflet
@@ -81,6 +82,13 @@ export default function MapPanel({ city, currentWeather, units, isVisible, onRea
                   </div>
                 </div>
               )}
+              <Link
+                href={`/city/${slugify(city.name || 'Unknown City')}?lat=${city.lat}&lon=${city.lon}&u=${units}`}
+                className="mt-2 inline-block text-sm text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 underline font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-1 rounded"
+                aria-label={`View details for ${city.name}`}
+              >
+                View details
+              </Link>
             </div>
           </Popup>
         </Marker>
