@@ -13,7 +13,6 @@ import { getCurrent, getForecast } from '@/lib/api';
 import { queryKeys } from '@/lib/queryKeys';
 import { askLocation, getLocationErrorMessage, GeoLocationError } from '@/lib/geo';
 import { addRecentSearch } from '@/lib/storage';
-import { generateCityUrl } from '@/lib/cityUtils';
 import ShareButton from '@/components/ShareButton';
 import OfflineIndicator from '@/components/OfflineIndicator';
 import FavoritesBar from '@/components/FavoritesBar';
@@ -204,13 +203,6 @@ export default function Home() {
     }
   }, [selectedCity, units, queryClient]);
 
-  const handleNavigateToCity = useCallback(() => {
-    if (selectedCity) {
-      const url = generateCityUrl(selectedCity, units);
-      window.open(url, '_blank');
-    }
-  }, [selectedCity, units]);
-
   const handleClearSearch = useCallback(() => {
     setSearchQuery('');
     setSelectedCity(null);
@@ -352,13 +344,6 @@ export default function Home() {
                     </h2>
                     <div className="flex items-center space-x-3">
                       <ShareButton city={selectedCity} units={units} />
-                      <button
-                        onClick={handleNavigateToCity}
-                        className="px-4 py-2 bg-white/60 dark:bg-slate-800/60 hover:bg-white/80 dark:hover:bg-slate-700/80 backdrop-blur-sm border border-slate-200/50 dark:border-slate-700/50 rounded-2xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-900 hover:scale-105 shadow-sm"
-                        aria-label={`View detailed weather page for ${selectedCity.name}`}
-                      >
-                        <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{strings.viewPage}</span>
-                      </button>
                       <button
                         onClick={handleClearSearch}
                         className="text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-900 rounded-lg p-2 hover:bg-slate-100 dark:hover:bg-slate-800"
