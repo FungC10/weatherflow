@@ -5,9 +5,9 @@ import { useQuery } from '@tanstack/react-query';
 import { getFavorites, FavoriteCity } from '@/lib/storage';
 import { getCurrent } from '@/lib/api';
 import { queryKeys } from '@/lib/queryKeys';
-import CurrentCard from './CurrentCard';
 import { Units, GeoPoint, CurrentWeather } from '@/lib/types';
 import { convertCurrentWeather } from '@/lib/unitConversion';
+import { formatTemp } from '@/lib/format';
 
 interface FavoriteCitiesCardsProps {
   units: Units;
@@ -102,34 +102,49 @@ function FavoriteCityCard({
     country: favorite.country
   };
 
+  const tempValue = convertedWeather ? formatTemp(convertedWeather.main.temp, units) : null;
+  const description = convertedWeather?.weather[0]?.description || '';
+
   if (isLoading) {
     return (
-      <div className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl rounded-3xl p-6 border border-slate-200/50 dark:border-slate-700/50 shadow-lg animate-pulse">
-        <div className="h-8 bg-slate-200/60 dark:bg-slate-700/60 rounded w-32 mb-4"></div>
-        <div className="h-12 bg-slate-200/60 dark:bg-slate-700/60 rounded w-20 mb-4"></div>
-        <div className="grid grid-cols-2 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-4 bg-slate-200/60 dark:bg-slate-700/60 rounded"></div>
-          ))}
-        </div>
+      <div className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl rounded-2xl p-5 border border-slate-200/50 dark:border-slate-700/50 shadow-lg animate-pulse">
+        <div className="h-6 bg-slate-200/60 dark:bg-slate-700/60 rounded w-28 mb-3"></div>
+        <div className="h-12 bg-slate-200/60 dark:bg-slate-700/60 rounded w-20"></div>
       </div>
     );
   }
 
-  if (!convertedWeather) {
+  if (!convertedWeather || !tempValue) {
     return null;
   }
 
   return (
     <div
       onClick={() => onCitySelect(city)}
-      className="cursor-pointer transition-transform hover:scale-[1.02] active:scale-[0.98]"
+      className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl rounded-2xl p-5 border border-slate-200/50 dark:border-slate-700/50 shadow-lg cursor-pointer transition-all hover:scale-[1.02] hover:shadow-xl active:scale-[0.98]"
+      role="button"
+      aria-label={`${city.name}, ${city.country}. ${tempValue}. Click to view details.`}
     >
-      <CurrentCard
-        weather={convertedWeather}
-        location={city}
-        units={units}
-      />
+      <div className="flex items-center justify-between">
+        <div className="flex-1 min-w-0">
+          <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 truncate mb-1">
+            {city.name}
+          </h3>
+          <p className="text-xs text-slate-600 dark:text-slate-400 truncate">
+            {city.country}
+          </p>
+        </div>
+        <div className="text-right ml-4">
+          <div className="text-3xl font-bold text-cyan-600 dark:text-cyan-300 leading-none">
+            {tempValue}
+          </div>
+          {description && (
+            <p className="text-xs text-slate-600 dark:text-slate-400 capitalize mt-1 truncate max-w-[80px]">
+              {description}
+            </p>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
