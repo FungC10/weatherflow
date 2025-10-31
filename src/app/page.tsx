@@ -216,6 +216,12 @@ export default function Home() {
     }
   }, []);
 
+  const handleGoHome = useCallback(() => {
+    setSearchQuery('');
+    setSelectedCity(null);
+    // Don't focus search input when clicking logo
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 transition-all duration-500">
       {/* Animated Background Elements */}
@@ -232,7 +238,7 @@ export default function Home() {
             <div className="flex flex-col lg:flex-row items-center justify-between space-y-6 lg:space-y-0">
               {/* Logo */}
               <button
-                onClick={handleClearSearch}
+                onClick={handleGoHome}
                 className="flex items-center space-x-4 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-900 rounded-lg p-2 -m-2"
                 aria-label="Go back to main page"
               >
