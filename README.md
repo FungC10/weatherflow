@@ -1,20 +1,22 @@
 # WeatherFlow
 
-A modern, feature-rich weather application built with Next.js 14, TypeScript, and Tailwind CSS. Get current weather conditions, detailed forecasts, and interactive maps for any city worldwide with a beautiful, accessible interface.
+A modern, feature-rich weather application built with Next.js 15, TypeScript, and Tailwind CSS. Get current weather conditions, detailed forecasts, and interactive maps for any city worldwide with a beautiful, accessible interface.
 
 ## ✨ Features
 
 ### 🌤️ **Weather Data**
 - **Current Weather**: Real-time temperature, humidity, wind speed, pressure, and conditions
 - **5-Day Forecast**: Extended weather predictions with daily highs, lows, and conditions
-- **Hourly Temperature Sparkline**: Desktop-only 24-hour temperature chart (Chart.js)
+- **Hourly Temperature Prediction**: Always-visible 24-hour temperature chart with clear hour labels
 - **Weather Icons**: Dynamic weather icons with day/night variations
 - **Unit Conversion**: Instant Celsius ↔ Fahrenheit conversion (no API calls)
 
 ### 🔍 **Search & Discovery**
 - **Smart Search**: Debounced city search with instant suggestions
-- **Recent Searches**: Quick access to previously searched cities
+- **Recent Searches**: Quick access to previously searched cities (stores full location data)
 - **Favorites System**: Pin up to 8 favorite cities for instant access
+- **Favorite City Cards**: View weather for all favorites at once on the main page
+- **Favorite Quick Access**: Small chips bar for switching favorites when viewing weather
 - **Keyboard Navigation**: Full arrow key navigation and Enter to select
 - **Geolocation**: Use your current location with permission handling
 
@@ -25,11 +27,13 @@ A modern, feature-rich weather application built with Next.js 14, TypeScript, an
 - **PWA Ready**: Installable as a mobile app with service worker
 
 ### 🎨 **User Experience**
-- **Dark Theme**: Beautiful dark UI with cyan accents and glassmorphism
+- **Light/Dark Mode**: Beautiful theme toggle with system preference detection
+- **Glass-morphism Design**: Modern UI with backdrop blur effects and gradient accents
 - **Responsive Design**: Perfect on desktop, tablet, and mobile
 - **Accessibility**: WCAG AA compliant with screen reader support
-- **Animations**: Smooth transitions with Framer Motion (respects reduced motion)
+- **Animations**: Smooth transitions and hover effects (respects reduced motion)
 - **Loading States**: Elegant loading animations and error handling
+- **Clean Interface**: Simplified toggles and intuitive layout
 
 ### ⚡ **Performance**
 - **Instant Unit Toggle**: Client-side conversion (no API calls)
@@ -39,16 +43,17 @@ A modern, feature-rich weather application built with Next.js 14, TypeScript, an
 
 ## 🛠️ Tech Stack
 
-- **Framework**: Next.js 14 (App Router)
+- **Framework**: Next.js 15 (App Router)
 - **Language**: TypeScript
-- **Styling**: Tailwind CSS
+- **Styling**: Tailwind CSS with CSS variables for theming
 - **Data Fetching**: TanStack Query (React Query)
 - **Maps**: Leaflet + React-Leaflet
-- **Charts**: Chart.js (dynamic import)
-- **Animations**: Framer Motion
+- **Charts**: Chart.js (dynamic import with SVG fallback)
 - **Icons**: Heroicons
 - **Testing**: Vitest + React Testing Library
 - **PWA**: Service Worker + Manifest
+- **State Management**: React Context (Theme, Locale)
+- **Storage**: LocalStorage for favorites, recent searches, and theme
 
 ## 🚀 Getting Started
 
@@ -232,13 +237,26 @@ This app supports multiple weather providers:
 - **Local Storage**: Persistent favorites across sessions
 - **Limit Management**: Maximum 8 favorites with automatic cleanup
 - **Cross-Tab Sync**: Favorites sync across browser tabs
+- **Weather Cards Display**: Main page shows weather cards for all favorites
+- **Quick Switch Bar**: Small chips for switching favorites when viewing weather (hidden on front page)
+- **Empty State Logic**: Welcome message hidden when 3+ favorites exist
 - **Keyboard Navigation**: Arrow keys + Enter to select favorites
 
 ### Search Experience
 - **Debounced Search**: 300ms delay to prevent excessive API calls
 - **Smart Suggestions**: Recent searches + API results
+- **Click Outside to Close**: Suggestions close when clicking outside search bar
+- **Full Location Data**: Recent searches store complete GeoPoint data (lat, lon, name, country)
 - **Keyboard First**: Full arrow key navigation
 - **Persistent UI**: Suggestions stay visible after Enter (2s delay)
+
+### Theme & UI
+- **System Preference Detection**: Automatically detects and applies user's preferred theme
+- **Persistent Theme**: Theme preference saved to localStorage
+- **Smooth Transitions**: FOUC prevention with inline script for instant theme application
+- **Simplified Controls**: Clean toggle buttons without unnecessary indicators
+- **Responsive Cards**: Weather cards adapt to screen size
+- **Loading Placeholders**: Full-size loading states matching actual content layout
 
 ### Offline Support
 - **Service Worker**: Caches static assets and weather data
@@ -275,11 +293,14 @@ src/
 ```
 
 ### Key Components
-- **SearchBar**: Smart search with suggestions and keyboard navigation
-- **CurrentCard**: Weather display with favorites and hourly chart
-- **ForecastList**: 5-day forecast with animations
-- **MapPanel**: Interactive map with weather markers
-- **FavoritesBar**: Horizontal scrollable favorites list
+- **SearchBar**: Smart search with suggestions, recent searches, and keyboard navigation
+- **CurrentCard**: Weather display with favorites button and hourly prediction chart
+- **ForecastList**: 5-day forecast with weather icons and conditions
+- **MapPanel**: Interactive map with city markers and weather popups
+- **FavoriteCitiesCards**: Grid display of favorite cities with current weather on main page
+- **FavoritesBar**: Compact chips bar for quick favorite switching (shown only when viewing weather)
+- **ThemeToggle**: Light/dark mode toggle with system preference detection
+- **UnitToggle**: Simple Celsius/Fahrenheit toggle button
 
 ### Performance Optimizations
 - **React.memo**: Prevents unnecessary re-renders
@@ -317,4 +338,4 @@ This project is licensed under the ISC License.
 - [TanStack Query](https://tanstack.com/query) for data fetching
 - [Chart.js](https://www.chartjs.org/) for data visualization
 - [Leaflet](https://leafletjs.com/) for interactive maps
-- [Framer Motion](https://www.framer.com/motion/) for animations
+- [Heroicons](https://heroicons.com/) for beautiful icons
