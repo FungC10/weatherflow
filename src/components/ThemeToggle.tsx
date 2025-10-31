@@ -22,12 +22,6 @@ export default function ThemeToggle() {
         title={`Current: ${isLight ? 'Light' : 'Dark'}`}
       >
         <CurrentIcon className="w-5 h-5 text-slate-600 dark:text-slate-300 transition-colors duration-200" />
-
-        {/* Theme indicator dots: light and dark */}
-        <div className="absolute -bottom-1 -right-1 flex space-x-0.5">
-          <div className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${isLight ? 'bg-amber-500 scale-125' : 'bg-slate-300 dark:bg-slate-600 scale-75'}`} />
-          <div className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${!isLight ? 'bg-blue-500 scale-125' : 'bg-slate-300 dark:bg-slate-600 scale-75'}`} />
-        </div>
       </button>
 
       {/* Tooltip */}
