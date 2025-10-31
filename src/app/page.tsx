@@ -62,6 +62,7 @@ export default function Home() {
   const [isRequestingLocation, setIsRequestingLocation] = useState(false);
   const [showMap, setShowMap] = useState(false);
   const [isMapLoading, setIsMapLoading] = useState(false);
+  const [favoritesCount, setFavoritesCount] = useState(0);
   const [originalCurrentWeather, setOriginalCurrentWeather] = useState<CurrentWeather | null>(null);
   const [originalForecast, setOriginalForecast] = useState<Forecast | null>(null);
   const [originalUnits, setOriginalUnits] = useState<Units>('metric');
@@ -296,21 +297,27 @@ export default function Home() {
             {!selectedCity && (
               <div className="space-y-8">
                 {/* Favorite Cities Weather Cards */}
-                <FavoriteCitiesCards units={units} onCitySelect={handleCitySelect} />
+                <FavoriteCitiesCards 
+                  units={units} 
+                  onCitySelect={handleCitySelect}
+                  onFavoritesCountChange={setFavoritesCount}
+                />
                 
-                {/* Empty State - only show if no favorites */}
-                <div className="flex items-center justify-center min-h-[40vh]">
-                  <EmptyState 
-                    action={{
-                      label: strings.searchForCity,
-                      onClick: () => {
-                        if (typeof window !== 'undefined') {
-                          document.querySelector('input')?.focus();
+                {/* Empty State - hide if 3 or more favorites */}
+                {favoritesCount < 3 && (
+                  <div className="flex items-center justify-center min-h-[40vh]">
+                    <EmptyState 
+                      action={{
+                        label: strings.searchForCity,
+                        onClick: () => {
+                          if (typeof window !== 'undefined') {
+                            document.querySelector('input')?.focus();
+                          }
                         }
-                      }
-                    }}
-                  />
-                </div>
+                      }}
+                    />
+                  </div>
+                )}
               </div>
             )}
 

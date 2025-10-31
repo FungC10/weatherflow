@@ -12,15 +12,17 @@ import { formatTemp } from '@/lib/format';
 interface FavoriteCitiesCardsProps {
   units: Units;
   onCitySelect: (city: GeoPoint) => void;
+  onFavoritesCountChange?: (count: number) => void;
 }
 
-export default function FavoriteCitiesCards({ units, onCitySelect }: FavoriteCitiesCardsProps) {
+export default function FavoriteCitiesCards({ units, onCitySelect, onFavoritesCountChange }: FavoriteCitiesCardsProps) {
   const [favorites, setFavorites] = useState<FavoriteCity[]>([]);
 
   useEffect(() => {
     const loadFavorites = () => {
       const favs = getFavorites();
       setFavorites(favs);
+      onFavoritesCountChange?.(favs.length);
     };
 
     loadFavorites();
@@ -41,7 +43,7 @@ export default function FavoriteCitiesCards({ units, onCitySelect }: FavoriteCit
       window.removeEventListener('storage', handleStorageChange);
       clearInterval(interval);
     };
-  }, []);
+  }, [onFavoritesCountChange]);
 
   if (favorites.length === 0) {
     return null;
