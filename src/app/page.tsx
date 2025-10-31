@@ -231,7 +231,11 @@ export default function Home() {
           <div className="container mx-auto px-6 py-6">
             <div className="flex flex-col lg:flex-row items-center justify-between space-y-6 lg:space-y-0">
               {/* Logo */}
-              <div className="flex items-center space-x-4">
+              <button
+                onClick={handleClearSearch}
+                className="flex items-center space-x-4 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-900 rounded-lg p-2 -m-2"
+                aria-label="Go back to main page"
+              >
                 <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center shadow-lg">
                   <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
@@ -240,7 +244,7 @@ export default function Home() {
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-cyan-400 dark:to-blue-400 bg-clip-text text-transparent">
                   WeatherFlow
                 </h1>
-              </div>
+              </button>
               
               {/* Search and Controls */}
               <div className="flex flex-col lg:flex-row items-center space-y-4 lg:space-y-0 lg:space-x-4 w-full lg:w-auto">
