@@ -95,11 +95,12 @@ export default function FavoritesBar({ onCitySelect, className = '' }: Favorites
 
   if (favorites.length === 0) {
     return (
-      <div className={`text-center py-4 ${className}`}>
-        <div className="text-slate-600 dark:text-slate-400 text-sm">
-          <StarOutlineIcon className="h-5 w-5 mx-auto mb-2" aria-hidden="true" />
-          <p>{strings.noFavorites}</p>
-          <p className="text-xs mt-1">{strings.addFavoritesMessage}</p>
+      <div className={`text-center py-2 ${className}`}>
+        <div className="inline-flex items-center gap-2 text-slate-600 dark:text-slate-400 text-sm">
+          <StarOutlineIcon className="h-4 w-4" aria-hidden="true" />
+          <span>{strings.noFavorites}</span>
+          <span className="text-xs text-slate-500 dark:text-slate-500">•</span>
+          <span className="text-xs">{strings.addFavoritesMessage}</span>
         </div>
       </div>
     );

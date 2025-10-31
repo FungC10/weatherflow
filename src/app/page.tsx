@@ -285,7 +285,7 @@ export default function Home() {
 
         {/* Favorites Bar - Only show when viewing a city */}
         {selectedCity && (
-          <div className="container mx-auto px-6 py-4 bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm">
+          <div className="container mx-auto px-6 py-3">
             <div className="max-w-6xl mx-auto">
               <FavoritesBar onCitySelect={handleCitySelect} />
             </div>
