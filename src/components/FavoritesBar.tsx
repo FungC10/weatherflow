@@ -108,16 +108,11 @@ export default function FavoritesBar({ onCitySelect, className = '' }: Favorites
   return (
     <div 
       ref={containerRef}
-      className={`space-y-3 ${className}`}
+      className={className}
       onKeyDown={handleKeyDown}
       role="region"
       aria-label={strings.favorites}
     >
-      <div className="flex items-center space-x-2">
-        <StarIcon className="h-5 w-5 text-amber-400" aria-hidden="true" />
-        <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300">{strings.favorites}</h3>
-      </div>
-      
       <div className="flex flex-wrap gap-2">
         {favorites.map((favorite, index) => (
           <div
