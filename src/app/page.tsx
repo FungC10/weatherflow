@@ -210,11 +210,17 @@ export default function Home() {
       }
     } catch (error) {
       const geoError = error as GeoLocationError;
-      setLocationError(getLocationErrorMessage(geoError));
       
-      // Update permission state after error
-      const currentState = await checkLocationPermission();
-      setPermissionState(currentState);
+      // If permission was denied, the state is definitely "denied"
+      if (geoError.type === 'permission_denied') {
+        setPermissionState('denied');
+      } else {
+        // For other errors, check the actual permission state
+        const currentState = await checkLocationPermission();
+        setPermissionState(currentState);
+      }
+      
+      setLocationError(getLocationErrorMessage(geoError));
     } finally {
       setIsRequestingLocation(false);
     }
@@ -320,35 +326,26 @@ export default function Home() {
                   <p className="mb-2">{locationError}</p>
                   {locationError.includes('permission') && (
                     <div className="mt-2 pt-2 border-t border-red-200 dark:border-red-500/30 text-xs">
-                      {permissionState === 'prompt' && (
-                        <p className="mb-2 p-2 bg-blue-50 dark:bg-blue-500/10 rounded text-blue-700 dark:text-blue-300">
-          ✅ Permission prompt available! Click "Use my location" again to see the permission dialog.
-                        </p>
-                      )}
-                      {permissionState === 'denied' && (
-                        <div className="space-y-2 text-left">
-                          <p className="font-semibold mb-1">Location is blocked. To enable:</p>
-                          <ul className="space-y-1 list-disc list-inside opacity-90 ml-2">
-                            <li>Look for the lock icon (🔒) or site settings icon in your browser's address bar</li>
-                            <li>Click it to open site settings</li>
-                            <li>Find "Location" in the permissions list</li>
-                            <li>Change it from "Block" to "Allow"</li>
-                            <li>Refresh this page and click "Use my location" again</li>
-                          </ul>
-                        </div>
-                      )}
-                      {permissionState === 'unknown' && (
-                        <div className="space-y-2 text-left">
-                          <p className="font-semibold">Try clicking "Use my location" again</p>
-                          <p className="opacity-90">The browser should show a permission prompt if available.</p>
-                          <p className="font-semibold mt-2">If no prompt appears, enable in browser settings:</p>
-                          <ul className="space-y-1 list-disc list-inside opacity-90 ml-2">
-                            <li>Look for the lock icon (🔒) in the address bar</li>
-                            <li>Find "Location" permissions and change to "Allow"</li>
-                            <li>Refresh and try again</li>
-                          </ul>
-                        </div>
-                      )}
+                      <div className="space-y-2 text-left">
+                        <p className="font-semibold mb-2">Location access was denied.</p>
+                        <p className="font-semibold">To enable location access:</p>
+                        <ol className="space-y-2 list-decimal list-inside opacity-90 ml-2">
+                          <li>
+                            <span className="font-medium">Try clicking "Use my location" again</span>
+                            <br />
+                            <span className="opacity-75">Some browsers may show the permission dialog again.</span>
+                          </li>
+                          <li>
+                            <span className="font-medium">Or enable in browser settings:</span>
+                            <ul className="mt-1 space-y-1 list-disc list-inside opacity-75 ml-4">
+                              <li>Click the lock icon (🔒) or site info icon in your browser's address bar</li>
+                              <li>Open "Site settings" or "Permissions"</li>
+                              <li>Find "Location" and change from "Block" to "Allow"</li>
+                              <li>Refresh this page and try again</li>
+                            </ul>
+                          </li>
+                        </ol>
+                      </div>
                     </div>
                   )}
                 </div>
